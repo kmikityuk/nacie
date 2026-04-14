@@ -1,0 +1,95 @@
+ Volume in drive C is System
+ Volume Serial Number is FA9D-55C5
+
+ Directory of c:\Users\mikityuk\Documents\IAEA-TECDOC-CRP-NACIE
+
+13.04.2026  16:18    <DIR>          .
+13.04.2026  11:53    <DIR>          ..
+04.04.2026  10:58            35'568 00-structure-v01.docx
+04.04.2026  09:08            25'117 01-chapter01-v01.docx
+04.04.2026  09:08            29'487 02-chapter02-v01.docx
+04.04.2026  09:09         3'802'149 03-chapter03-v01.docx
+04.04.2026  09:10         2'179'942 04-chapter04-v01.docx
+04.04.2026  10:02            13'325 05-chapter05-v01.docx
+04.04.2026  09:12         4'373'090 06-chapter06-v01.docx
+04.04.2026  09:59         1'400'479 07-chapter07-v01.docx
+04.04.2026  10:00         4'122'524 08-chapter08-v01.docx
+04.04.2026  10:00         1'891'140 09-chapter09-v01.docx
+04.04.2026  10:02            13'325 10-conclusions-v01.docx
+04.04.2026  10:02            13'325 11-references-v01.docx
+04.04.2026  10:02            13'325 12-abbreviations-v01.docx
+04.04.2026  10:02            13'325 13-annexI-technical-specification-v01.docx
+13.04.2026  12:02           926'331 14-annexII-description-of-organizations-01-ANL-v01.docx
+13.04.2026  12:02            33'806 14-annexII-description-of-organizations-02-CIAE-v01.docx
+04.04.2026  10:02            13'325 14-annexII-description-of-organizations-03-CNPRI-v00.docx
+13.04.2026  12:00            27'830 14-annexII-description-of-organizations-04-ENEA-v01.docx
+04.04.2026  10:02            13'325 14-annexII-description-of-organizations-05-Gidropress-v00.docx
+13.04.2026  12:05            23'535 14-annexII-description-of-organizations-06-IANS-v01.docx
+13.04.2026  12:06            31'840 14-annexII-description-of-organizations-07-IBRAE-v01.docx
+04.04.2026  10:02            13'325 14-annexII-description-of-organizations-08-IGCAR-v00.docx
+13.04.2026  12:07            21'605 14-annexII-description-of-organizations-09-JRC-v01.docx
+04.04.2026  10:02            13'325 14-annexII-description-of-organizations-10-KAERI-v00.docx
+13.04.2026  12:24            24'757 14-annexII-description-of-organizations-11-KIT-v01.docx
+13.04.2026  12:24            29'894 14-annexII-description-of-organizations-12-NIKIET-v01.docx
+04.04.2026  10:02            13'325 14-annexII-description-of-organizations-13-NINE-v00.docx
+13.04.2026  12:24            27'581 14-annexII-description-of-organizations-14-NRG-v01.docx
+04.04.2026  10:02            13'325 14-annexII-description-of-organizations-15-PSI-v00.docx
+13.04.2026  12:24            33'542 14-annexII-description-of-organizations-16-PUB-v01.docx
+13.04.2026  12:31            20'317 14-annexII-description-of-organizations-17-RATEN-v01.docx
+13.04.2026  12:31            32'750 14-annexII-description-of-organizations-18-Sapienza-v01.docx
+04.04.2026  10:02            13'325 14-annexII-description-of-organizations-19-UNIPI-v00.docx
+13.04.2026  12:31            28'452 14-annexII-description-of-organizations-20-WEC-v01.docx
+13.04.2026  12:31            24'159 14-annexII-description-of-organizations-21-XJTU-v01.docx
+04.04.2026  11:59            21'751 15-annexIII-description-of-codes-01-anteo-v01.docx
+13.04.2026  12:40            30'745 15-annexIII-description-of-codes-02-celsist-v01.docx
+13.04.2026  12:41            24'888 15-annexIII-description-of-codes-03-cfx-v01.docx
+13.04.2026  12:41            43'189 15-annexIII-description-of-codes-04-cobra-v01.docx
+04.04.2026  10:02            13'325 15-annexIII-description-of-codes-05-ctfr-v00.docx
+04.04.2026  10:02            13'325 15-annexIII-description-of-codes-06-flownex-v00.docx
+13.04.2026  12:41            23'382 15-annexIII-description-of-codes-07-fluent-v01.docx
+13.04.2026  12:43            34'879 15-annexIII-description-of-codes-08-frtac-v01.docx
+04.04.2026  10:02            13'325 15-annexIII-description-of-codes-09-gamma-v00.docx
+13.04.2026  13:03            33'896 15-annexIII-description-of-codes-10-hydra-ibrae-lm-v01.docx
+04.04.2026  10:02            13'325 15-annexIII-description-of-codes-11-locust-v00.docx
+13.04.2026  13:05            31'876 15-annexIII-description-of-codes-12-logos-v01.docx
+04.04.2026  10:02            13'325 15-annexIII-description-of-codes-13-matador-v00.docx
+13.04.2026  13:18           928'243 15-annexIII-description-of-codes-14-nekrs-cardinal-v01.docx
+13.04.2026  13:17            23'179 15-annexIII-description-of-codes-15-openfoam-baram-v01.docx
+13.04.2026  13:20            22'273 15-annexIII-description-of-codes-16-openfoam-v01.docx
+13.04.2026  13:21            31'603 15-annexIII-description-of-codes-17-puchok-gmt-v01.docx
+13.04.2026  13:12            33'300 15-annexIII-description-of-codes-18-relap5-v01.docx
+04.04.2026  10:02            13'325 15-annexIII-description-of-codes-19-relap-3d-v00.docx
+13.04.2026  13:13            22'132 15-annexIII-description-of-codes-20-relap-scdapcim-v01.docx
+13.04.2026  13:26         1'100'749 15-annexIII-description-of-codes-21-sam-moose-scm-v01.docx
+13.04.2026  13:14         1'074'024 15-annexIII-description-of-codes-22-sas4a-sassys-v01.docx
+13.04.2026  13:14            29'176 15-annexIII-description-of-codes-23-spectra-v01.docx
+13.04.2026  13:11            29'474 15-annexIII-description-of-codes-24-star-ccm-v01.docx
+13.04.2026  13:15           830'062 15-annexIII-description-of-codes-25-thacs-v01.docx
+04.04.2026  10:02            13'325 15-annexIII-description-of-codes-26-thor-v00.docx
+04.04.2026  10:02            13'325 15-annexIII-description-of-codes-27-trace-v00.docx
+04.04.2026  10:02            13'325 15-annexIII-description-of-codes-28-xathas-lbe-v00.docx
+13.04.2026  13:23           491'748 15-annexIII-description-of-codes-29-yaoguang-v01.docx
+04.04.2026  10:22         9'874'380 16-annexIV-individual results-01-ANL-v01.docx
+04.04.2026  10:22         4'343'278 16-annexIV-individual results-02-CIAE-v01.docx
+04.04.2026  10:02            13'325 16-annexIV-individual-results-03-CNPRI-v00.docx
+04.04.2026  10:02            13'325 16-annexIV-individual-results-05-Gidropress-v00.docx
+04.04.2026  10:27         7'480'626 16-annexIV-individual-results-06-IANS-v01.docx
+04.04.2026  10:28         3'475'336 16-annexIV-individual-results-07-IBRAE-v01.docx
+04.04.2026  10:02            13'325 16-annexIV-individual-results-08-IGCAR-v00.docx
+04.04.2026  10:34        10'261'490 16-annexIV-individual-results-09-JRC-v01.docx
+13.04.2026  16:18            19'444 16-annexIV-individual-results-10-KAERI-v00.docx
+04.04.2026  10:35         2'058'803 16-annexIV-individual-results-11-KIT-v01.docx
+04.04.2026  10:40         5'743'702 16-annexIV-individual-results-12-NIKIET-v01.docx
+04.04.2026  10:02            13'325 16-annexIV-individual-results-13-NINE-v00.docx
+04.04.2026  10:42         6'281'924 16-annexIV-individual-results-14-NRG-v01.docx
+04.04.2026  10:02            13'325 16-annexIV-individual-results-15-PSI-v00.docx
+04.04.2026  10:43         2'874'485 16-annexIV-individual-results-16-PUB-v01.docx
+04.04.2026  10:02            13'325 16-annexIV-individual-results-17-RATEN-v00.docx
+04.04.2026  10:45         2'620'909 16-annexIV-individual-results-18-Sapienza-v01.docx
+04.04.2026  10:47         8'953'758 16-annexIV-individual-results-19-UNIPI-v01.docx
+04.04.2026  10:48         1'866'952 16-annexIV-individual-results-20-WEC-v01.docx
+04.04.2026  10:49         9'067'841 16-annexIV-individual-results-21-XJTU-v01.docx
+13.04.2026  16:18                 0 list.txt
+13.04.2026  15:09           132'462 TECDOC status CRP NACIE 2026.03.03.pptx
+              86 File(s)     99'421'629 bytes
+               2 Dir(s)  311'178'887'168 bytes free
