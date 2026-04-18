@@ -1,0 +1,104 @@
+SECTION SUMMARY
+---------------
+- chapters: total=12, present=8, placeholders=4
+- annex-I-technical-specification: total=1, present=0, placeholders=1
+- annex-II-organizations: total=21, present=14, placeholders=7
+- annex-III-codes: total=29, present=20, placeholders=9
+- annex-IV-individual-results: total=21, present=14, placeholders=7
+
+FULL FILE INVENTORY
+-------------------
+SECTION                        ITEM  VERSION   SIZE_KB  STATUS                  SHORT_NAME                      REL_PATH
+-----------------------------  ----  -------  --------  ----------------------  ------------------------------  ----------------------------------------
+annex-I-technical-specific...        00           13.0  placeholder             annexI-technical-specification  annex-I-technical-specification/annexI-technical-specification-v00.docx
+annex-II-organizations           01  01          904.6  normal                  ANL                             annex-II-organizations/01-ANL-v01.docx
+annex-II-organizations           02  01           33.0  normal                  CIAE                            annex-II-organizations/02-CIAE-v01.docx
+annex-II-organizations           03  00           13.0  placeholder             CNPRI                           annex-II-organizations/03-CNPRI-v00.docx
+annex-II-organizations           04  01           27.2  normal                  ENEA                            annex-II-organizations/04-ENEA-v01.docx
+annex-II-organizations           05  00           13.0  placeholder             GIDROPRESS                      annex-II-organizations/05-GIDROPRESS-v00.docx
+annex-II-organizations           06  01           23.0  normal                  IANS                            annex-II-organizations/06-IANS-v01.docx
+annex-II-organizations           07  01           31.1  normal                  IBRAE                           annex-II-organizations/07-IBRAE-v01.docx
+annex-II-organizations           08  00           13.0  placeholder             IGCAR                           annex-II-organizations/08-IGCAR-v00.docx
+annex-II-organizations           09  01           21.1  normal                  JRC                             annex-II-organizations/09-JRC-v01.docx
+annex-II-organizations           10  00           13.0  placeholder             KAERI                           annex-II-organizations/10-KAERI-v00.docx
+annex-II-organizations           11  01           24.2  normal                  KIT                             annex-II-organizations/11-KIT-v01.docx
+annex-II-organizations           12  01           29.2  normal                  NIKIET                          annex-II-organizations/12-NIKIET-v01.docx
+annex-II-organizations           13  00           13.0  placeholder             NINE                            annex-II-organizations/13-NINE-v00.docx
+annex-II-organizations           14  01           26.9  normal                  NRG                             annex-II-organizations/14-NRG-v01.docx
+annex-II-organizations           15  00           13.0  placeholder             PSI                             annex-II-organizations/15-PSI-v00.docx
+annex-II-organizations           16  01           32.8  normal                  PUB                             annex-II-organizations/16-PUB-v01.docx
+annex-II-organizations           17  01           19.8  normal                  RATEN                           annex-II-organizations/17-RATEN-v01.docx
+annex-II-organizations           18  01           32.0  normal                  SAPIENZA                        annex-II-organizations/18-SAPIENZA-v01.docx
+annex-II-organizations           19  00           13.0  placeholder             UNIPI                           annex-II-organizations/19-UNIPI-v00.docx
+annex-II-organizations           20  01           27.8  normal                  WEC                             annex-II-organizations/20-WEC-v01.docx
+annex-II-organizations           21  01           23.6  normal                  XJTU                            annex-II-organizations/21-XJTU-v01.docx
+annex-III-codes                  01  01           21.2  normal                  anteo                           annex-III-codes/01-anteo-v01.docx
+annex-III-codes                  02  01           30.0  normal                  celsist                         annex-III-codes/02-celsist-v01.docx
+annex-III-codes                  03  01           24.3  normal                  cfx                             annex-III-codes/03-cfx-v01.docx
+annex-III-codes                  04  01           42.2  normal                  cobra                           annex-III-codes/04-cobra-v01.docx
+annex-III-codes                  05  00           13.0  placeholder             ctfr                            annex-III-codes/05-ctfr-v00.docx
+annex-III-codes                  06  00           13.0  placeholder             flownex                         annex-III-codes/06-flownex-v00.docx
+annex-III-codes                  07  01           22.8  normal                  fluent                          annex-III-codes/07-fluent-v01.docx
+annex-III-codes                  08  01           34.1  normal                  frtac                           annex-III-codes/08-frtac-v01.docx
+annex-III-codes                  09  00           13.0  placeholder             gamma                           annex-III-codes/09-gamma-v00.docx
+annex-III-codes                  10  01           33.1  normal                  hydra-ibrae-lm                  annex-III-codes/10-hydra-ibrae-lm-v01.docx
+annex-III-codes                  11  00           13.0  placeholder             locust                          annex-III-codes/11-locust-v00.docx
+annex-III-codes                  12  01           31.1  normal                  logos                           annex-III-codes/12-logos-v01.docx
+annex-III-codes                  13  00           13.0  placeholder             matador                         annex-III-codes/13-matador-v00.docx
+annex-III-codes                  14  01          906.5  normal                  nekrs-cardinal                  annex-III-codes/14-nekrs-cardinal-v01.docx
+annex-III-codes                  15  01           22.6  normal                  openfoam-baram                  annex-III-codes/15-openfoam-baram-v01.docx
+annex-III-codes                  16  01           21.8  normal                  openfoam                        annex-III-codes/16-openfoam-v01.docx
+annex-III-codes                  17  01           30.9  normal                  puchok-gmt                      annex-III-codes/17-puchok-gmt-v01.docx
+annex-III-codes                  18  01           32.5  normal                  relap5                          annex-III-codes/18-relap5-v01.docx
+annex-III-codes                  19  00           13.0  placeholder             relap-3d                        annex-III-codes/19-relap-3d-v00.docx
+annex-III-codes                  20  01           21.6  normal                  relap-scdapcim                  annex-III-codes/20-relap-scdapcim-v01.docx
+annex-III-codes                  21  01         1075.0  normal                  sam-moose-scm                   annex-III-codes/21-sam-moose-scm-v01.docx
+annex-III-codes                  22  01         1048.9  normal                  sas4a-sassys                    annex-III-codes/22-sas4a-sassys-v01.docx
+annex-III-codes                  23  01           28.5  normal                  spectra                         annex-III-codes/23-spectra-v01.docx
+annex-III-codes                  24  01           28.8  normal                  star-ccm                        annex-III-codes/24-star-ccm-v01.docx
+annex-III-codes                  25  01          810.6  normal                  thacs                           annex-III-codes/25-thacs-v01.docx
+annex-III-codes                  26  00           13.0  placeholder             thor                            annex-III-codes/26-thor-v00.docx
+annex-III-codes                  27  00           13.0  placeholder             trace                           annex-III-codes/27-trace-v00.docx
+annex-III-codes                  28  00           13.0  placeholder             xathas-lbe                      annex-III-codes/28-xathas-lbe-v00.docx
+annex-III-codes                  29  01          480.2  normal                  yaoguang                        annex-III-codes/29-yaoguang-v01.docx
+annex-IV-individual-results      01  01         9642.9  normal                  ANL                             annex-IV-individual-results/01-ANL-v01.docx
+annex-IV-individual-results      02  01         4241.5  normal                  CIAE                            annex-IV-individual-results/02-CIAE-v01.docx
+annex-IV-individual-results      03  00           13.0  placeholder             CNPRI                           annex-IV-individual-results/03-CNPRI-v00.docx
+annex-IV-individual-results      04  01        16161.3  normal                  ENEA                            annex-IV-individual-results/04-ENEA-v01.docx
+annex-IV-individual-results      05  00           13.0  placeholder             GIDROPRESS                      annex-IV-individual-results/05-GIDROPRESS-v00.docx
+annex-IV-individual-results      06  01         7305.3  normal                  IANS                            annex-IV-individual-results/06-IANS-v01.docx
+annex-IV-individual-results      07  01         3393.9  normal                  IBRAE                           annex-IV-individual-results/07-IBRAE-v01.docx
+annex-IV-individual-results      08  00           13.0  placeholder             IGCAR                           annex-IV-individual-results/08-IGCAR-v00.docx
+annex-IV-individual-results      09  01        10021.0  normal                  JRC                             annex-IV-individual-results/09-JRC-v01.docx
+annex-IV-individual-results      10  00           19.0  placeholder             KAERI                           annex-IV-individual-results/10-KAERI-v00.docx
+annex-IV-individual-results      11  01         2010.5  normal                  KIT                             annex-IV-individual-results/11-KIT-v01.docx
+annex-IV-individual-results      12  01         5609.1  normal                  NIKIET                          annex-IV-individual-results/12-NIKIET-v01.docx
+annex-IV-individual-results      13  00           13.0  placeholder             NINE                            annex-IV-individual-results/13-NINE-v00.docx
+annex-IV-individual-results      14  01         6134.7  normal                  NRG                             annex-IV-individual-results/14-NRG-v01.docx
+annex-IV-individual-results      15  00           13.0  placeholder             PSI                             annex-IV-individual-results/15-PSI-v00.docx
+annex-IV-individual-results      16  01         2807.1  normal                  PUB                             annex-IV-individual-results/16-PUB-v01.docx
+annex-IV-individual-results      17  00           13.0  placeholder             RATEN                           annex-IV-individual-results/17-RATEN-v00.docx
+annex-IV-individual-results      18  01         2559.5  normal                  SAPIENZA                        annex-IV-individual-results/18-SAPIENZA-v01.docx
+annex-IV-individual-results      19  01         8743.9  normal                  UNIPI                           annex-IV-individual-results/19-UNIPI-v01.docx
+annex-IV-individual-results      20  01         1823.2  normal                  WEC                             annex-IV-individual-results/20-WEC-v01.docx
+annex-IV-individual-results      21  01         8855.3  normal                  XJTU                            annex-IV-individual-results/21-XJTU-v01.docx
+chapters                         01  01           24.5  normal                  chapter01                       chapters/01-chapter01-v01.docx
+chapters                         02  01           28.8  normal                  chapter02                       chapters/02-chapter02-v01.docx
+chapters                         03  01         3713.0  normal                  chapter03                       chapters/03-chapter03-v01.docx
+chapters                         04  01         2128.8  normal                  chapter04                       chapters/04-chapter04-v01.docx
+chapters                         05  00           13.0  placeholder             chapter05                       chapters/05-chapter05-v00.docx
+chapters                         06  01         4270.6  normal                  chapter06                       chapters/06-chapter06-v01.docx
+chapters                         07  01         1367.7  normal                  chapter07                       chapters/07-chapter07-v01.docx
+chapters                         08  01         4025.9  normal                  chapter08                       chapters/08-chapter08-v01.docx
+chapters                         09  01         1846.8  normal                  chapter09                       chapters/09-chapter09-v01.docx
+chapters                         10  00           13.0  placeholder             conclusions                     chapters/10-conclusions-v00.docx
+chapters                         11  00           13.0  placeholder             references                      chapters/11-references-v00.docx
+chapters                         12  00           13.0  placeholder             abbreviations                   chapters/12-abbreviations-v00.docx
+
+ANNEX NOTES
+-----------
+- No special annex notes.
+
+WARNINGS / MANUAL CHECKS
+------------------------
+- No unusual manual checks.

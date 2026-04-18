@@ -4,17 +4,17 @@
   "placeholder_count": 28,
   "files": [
     {
-      "rel_path": "annex-I-technical-specification/13-annexI-technical-specification-v01.docx",
+      "rel_path": "annex-I-technical-specification/annexI-technical-specification-v00.docx",
       "category": "annex",
       "section": "annex-I-technical-specification",
-      "item_no": 13,
+      "item_no": null,
       "short_name": "annexI-technical-specification",
-      "version": "01",
+      "version": "00",
       "extension": ".docx",
       "size_bytes": 13325,
       "size_kb": 13.0,
       "placeholder_likely": true,
-      "placeholder_reason": "small file <= 20000 bytes; exact size matches common placeholder docx",
+      "placeholder_reason": "small file <= 20000 bytes; version v00; exact size matches common placeholder docx",
       "exists": true
     },
     {
@@ -1068,17 +1068,17 @@
       "exists": true
     },
     {
-      "rel_path": "chapters/05-chapter05-v01.docx",
+      "rel_path": "chapters/05-chapter05-v00.docx",
       "category": "chapter",
       "section": "chapters",
       "item_no": 5,
       "short_name": "chapter05",
-      "version": "01",
+      "version": "00",
       "extension": ".docx",
       "size_bytes": 13325,
       "size_kb": 13.0,
       "placeholder_likely": true,
-      "placeholder_reason": "small file <= 20000 bytes; exact size matches common placeholder docx",
+      "placeholder_reason": "small file <= 20000 bytes; version v00; exact size matches common placeholder docx",
       "exists": true
     },
     {
@@ -1138,45 +1138,45 @@
       "exists": true
     },
     {
-      "rel_path": "chapters/10-conclusions-v01.docx",
+      "rel_path": "chapters/10-conclusions-v00.docx",
       "category": "chapter",
       "section": "chapters",
       "item_no": 10,
       "short_name": "conclusions",
-      "version": "01",
+      "version": "00",
       "extension": ".docx",
       "size_bytes": 13325,
       "size_kb": 13.0,
       "placeholder_likely": true,
-      "placeholder_reason": "small file <= 20000 bytes; exact size matches common placeholder docx",
+      "placeholder_reason": "small file <= 20000 bytes; version v00; exact size matches common placeholder docx",
       "exists": true
     },
     {
-      "rel_path": "chapters/11-references-v01.docx",
+      "rel_path": "chapters/11-references-v00.docx",
       "category": "chapter",
       "section": "chapters",
       "item_no": 11,
       "short_name": "references",
-      "version": "01",
+      "version": "00",
       "extension": ".docx",
       "size_bytes": 13325,
       "size_kb": 13.0,
       "placeholder_likely": true,
-      "placeholder_reason": "small file <= 20000 bytes; exact size matches common placeholder docx",
+      "placeholder_reason": "small file <= 20000 bytes; version v00; exact size matches common placeholder docx",
       "exists": true
     },
     {
-      "rel_path": "chapters/12-abbreviations-v01.docx",
+      "rel_path": "chapters/12-abbreviations-v00.docx",
       "category": "chapter",
       "section": "chapters",
       "item_no": 12,
       "short_name": "abbreviations",
-      "version": "01",
+      "version": "00",
       "extension": ".docx",
       "size_bytes": 13325,
       "size_kb": 13.0,
       "placeholder_likely": true,
-      "placeholder_reason": "small file <= 20000 bytes; exact size matches common placeholder docx",
+      "placeholder_reason": "small file <= 20000 bytes; version v00; exact size matches common placeholder docx",
       "exists": true
     }
   ]

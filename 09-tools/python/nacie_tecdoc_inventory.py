@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import csv
 import json
 import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Optional
+
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -30,12 +30,16 @@ SOURCE_ROOT = ROOT / "01-source"
 MANIFEST_ROOT = ROOT / "02-manifest"
 
 # Inventory output files.
-CSV_PATH = MANIFEST_ROOT / "files-inventory.csv"
-JSON_PATH = MANIFEST_ROOT / "files-inventory.json"
+TXT_PATH = MANIFEST_ROOT / "nacie_tecdoc_files_inventory.txt"
+JSON_PATH = MANIFEST_ROOT / "nacie_tecdoc_files_inventory.json"
 
 # Files smaller than or equal to this threshold are suspicious and may be
 # placeholders, especially if combined with version v00.
 PLACEHOLDER_SIZE_THRESHOLD = 20_000  # bytes
+
+# In the current corpus, many placeholder Word documents had this exact size.
+KNOWN_PLACEHOLDER_DOCX_SIZE = 13_325
+
 
 # ---------------------------------------------------------------------------
 # Data model
@@ -46,8 +50,8 @@ class InventoryRow:
     """
     One row of inventory information for a single file found under 01-source.
 
-    Fields are designed to be easy to export both to CSV and JSON and to
-    support later QA checks and manifest generation.
+    Fields are designed to be easy to export both to fixed-width text and JSON
+    and to support later QA checks and manifest generation.
     """
     rel_path: str
     category: str
@@ -70,24 +74,9 @@ class InventoryRow:
 def classify_path(path: Path) -> tuple[str, str]:
     """
     Classify a file based on its path relative to 01-source.
-
-    Parameters
-    ----------
-    path : Path
-        Path relative to SOURCE_ROOT, for example:
-        'chapters/01-chapter01-v01.docx'
-
-    Returns
-    -------
-    tuple[str, str]
-        (category, section), where:
-        - category is a broad class such as 'chapter' or 'annex'
-        - section is the exact top-level source subsection
     """
     parts = path.parts
 
-    # We expect at least:
-    #   top-level folder / filename
     if len(parts) < 2:
         return "unknown", "unknown"
 
@@ -104,7 +93,6 @@ def classify_path(path: Path) -> tuple[str, str]:
     if top == "annex-IV-individual-results":
         return "annex", "annex-IV-individual-results"
 
-    # Fallback for unexpected directory names.
     return "unknown", top
 
 
@@ -119,58 +107,21 @@ def parse_filename(
 ) -> tuple[Optional[int], Optional[str], Optional[str]]:
     """
     Extract structured information from a normalized filename.
-
-    Parameters
-    ----------
-    category : str
-        High-level classification such as 'chapter' or 'annex'.
-        Currently not used directly in parsing logic, but kept as an argument
-        because future section-specific parsing rules may depend on it.
-
-    section : str
-        Exact subsection such as 'chapters' or 'annex-III-codes'.
-        Currently not used directly in parsing logic, but retained for future
-        extension and readability.
-
-    filename : str
-        File name only, for example:
-        '03-chapter03-v01.docx'
-        '11-KIT-v01.docx'
-        '21-sam-moose-scm-v01.docx'
-
-    Returns
-    -------
-    tuple[Optional[int], Optional[str], Optional[str]]
-        (item_no, short_name, version)
-
-        - item_no: leading numeric item index if present
-        - short_name: the descriptive middle part
-        - version: two-digit version string without the leading 'v'
     """
-    # Pattern 1:
-    #   NN-short-name-vNN.ext
-    #
-    # Examples:
-    #   03-chapter03-v01.docx
-    #   11-KIT-v01.docx
-    #   21-sam-moose-scm-v01.docx
+    _ = category
+    _ = section
+
     pattern_with_item = (
         r"^(?P<item>\d{2})-(?P<short>.+)-v(?P<ver>\d{2})"
-        r"\.(docx|pptx|md|txt|xlsx)$"
+        r"\.(docx|pptx|md|txt|xlsx|pdf)$"
     )
 
-    # Pattern 2:
-    #   short-name-vNN.ext
-    #
-    # This is a fallback for files without a leading numeric index.
     pattern_without_item = (
         r"^(?P<short>.+)-v(?P<ver>\d{2})"
-        r"\.(docx|pptx|md|txt|xlsx)$"
+        r"\.(docx|pptx|md|txt|xlsx|pdf)$"
     )
 
-    patterns = [pattern_with_item, pattern_without_item]
-
-    for pattern in patterns:
+    for pattern in (pattern_with_item, pattern_without_item):
         match = re.fullmatch(pattern, filename, re.IGNORECASE)
         if not match:
             continue
@@ -181,7 +132,6 @@ def parse_filename(
         version = groups.get("ver")
         return item_no, short_name, version
 
-    # Could not parse expected fields from the file name.
     return None, None, None
 
 
@@ -196,31 +146,6 @@ def detect_placeholder(
 ) -> tuple[bool, str]:
     """
     Determine whether a file is likely a placeholder or near-empty template.
-
-    Heuristics used here are intentionally simple and conservative:
-    - zero-byte file
-    - very small file
-    - version v00
-    - exact size equal to a repeated placeholder DOCX size observed in the corpus
-
-    Parameters
-    ----------
-    path : Path
-        File path, used mainly for extension-based checks.
-
-    size_bytes : int
-        File size in bytes.
-
-    version : Optional[str]
-        Parsed version string, such as '00' or '01'.
-
-    Returns
-    -------
-    tuple[bool, str]
-        (placeholder_likely, reason)
-
-        If placeholder_likely is True, reason contains a semicolon-separated
-        explanation of which rules fired.
     """
     reasons: list[str] = []
 
@@ -233,10 +158,8 @@ def detect_placeholder(
     if version == "00":
         reasons.append("version v00")
 
-    # In your current corpus, many placeholder Word documents had the exact
-    # same size. This is a useful strong signal.
     filename_lower = path.name.lower()
-    if filename_lower.endswith(".docx") and size_bytes == 13_325:
+    if filename_lower.endswith(".docx") and size_bytes == KNOWN_PLACEHOLDER_DOCX_SIZE:
         reasons.append("exact size matches common placeholder docx")
 
     if reasons:
@@ -252,42 +175,23 @@ def detect_placeholder(
 def build_inventory() -> list[InventoryRow]:
     """
     Scan 01-source recursively and build the file inventory.
-
-    Returns
-    -------
-    list[InventoryRow]
-        One inventory row per file found in the source tree.
-
-    Raises
-    ------
-    FileNotFoundError
-        If SOURCE_ROOT does not exist.
     """
     rows: list[InventoryRow] = []
 
     if not SOURCE_ROOT.exists():
         raise FileNotFoundError(f"Source directory not found: {SOURCE_ROOT}")
 
-    # rglob("*") recursively scans all files and folders under 01-source.
     for path in sorted(SOURCE_ROOT.rglob("*")):
         if not path.is_file():
             continue
 
-        # Path relative to 01-source is more useful than absolute paths in the
-        # manifest, because it remains portable across machines.
         rel_path = path.relative_to(SOURCE_ROOT)
-
-        # Determine broad document type and exact section.
         category, section = classify_path(rel_path)
-
-        # Parse structured fields from the normalized file name.
         item_no, short_name, version = parse_filename(category, section, path.name)
 
-        # Collect file statistics.
         size_bytes = path.stat().st_size
         size_kb = round(size_bytes / 1024.0, 1)
 
-        # Detect whether this looks like a placeholder/incomplete input.
         placeholder_likely, placeholder_reason = detect_placeholder(
             path=path,
             size_bytes=size_bytes,
@@ -315,57 +219,178 @@ def build_inventory() -> list[InventoryRow]:
 
 
 # ---------------------------------------------------------------------------
+# Formatting helpers
+# ---------------------------------------------------------------------------
+
+def truncate(value: str, width: int) -> str:
+    """
+    Truncate a string to fit a fixed-width text column.
+    """
+    if len(value) <= width:
+        return value
+
+    if width <= 3:
+        return value[:width]
+
+    return value[: width - 3] + "..."
+
+
+def format_item_no(item_no: Optional[int]) -> str:
+    """
+    Format the item number for fixed-width output.
+    """
+    if item_no is None:
+        return ""
+    return f"{item_no:02d}"
+
+
+def generic_status(row: InventoryRow) -> str:
+    """
+    Return a short generic status label for the full inventory table.
+    """
+    return "placeholder" if row.placeholder_likely else "normal"
+
+
+def rows_for_section(rows: list[InventoryRow], section: str) -> list[InventoryRow]:
+    """
+    Filter rows for one section and sort them by item number then path.
+    """
+    return sorted(
+        [row for row in rows if row.section == section],
+        key=lambda row: ((row.item_no or 9999), row.rel_path),
+    )
+
+
+# ---------------------------------------------------------------------------
 # Output writers
 # ---------------------------------------------------------------------------
 
-def write_csv(rows: list[InventoryRow], path: Path) -> None:
+def write_text_report(rows: list[InventoryRow], path: Path) -> None:
     """
-    Write the inventory rows to CSV.
+    Write the inventory rows to a fixed-width plain text report.
 
-    Parameters
-    ----------
-    rows : list[InventoryRow]
-        Inventory rows to export.
-
-    path : Path
-        Output CSV path.
+    The report is intended for easy reading in a text editor or terminal and
+    starts with compact summaries before the full listing.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    fieldnames = [
-        "rel_path",
-        "category",
-        "section",
-        "item_no",
-        "short_name",
-        "version",
-        "extension",
-        "size_bytes",
-        "size_kb",
-        "placeholder_likely",
-        "placeholder_reason",
-        "exists",
-    ]
+    section_w = 29
+    item_w = 4
+    version_w = 7
+    size_w = 8
+    status_w = 22
+    short_name_w = 30
 
-    with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
-        writer.writeheader()
+    chapter_rows = rows_for_section(rows, "chapters")
+    annex1_rows = rows_for_section(rows, "annex-I-technical-specification")
+    annex2_rows = rows_for_section(rows, "annex-II-organizations")
+    annex3_rows = rows_for_section(rows, "annex-III-codes")
+    annex4_rows = rows_for_section(rows, "annex-IV-individual-results")
+
+    with path.open("w", encoding="utf-8") as handle:
+        # -------------------------------------------------------------------
+        # Compact section summaries
+        # -------------------------------------------------------------------
+        handle.write("SECTION SUMMARY\n")
+        handle.write("---------------\n")
+
+        def write_section_summary(label: str, section_rows: list[InventoryRow]) -> None:
+            total = len(section_rows)
+            placeholders = sum(1 for row in section_rows if row.placeholder_likely)
+            present = total - placeholders
+            handle.write(
+                f"- {label}: total={total}, present={present}, placeholders={placeholders}\n"
+            )
+
+        write_section_summary("chapters", chapter_rows)
+        write_section_summary("annex-I-technical-specification", annex1_rows)
+        write_section_summary("annex-II-organizations", annex2_rows)
+        write_section_summary("annex-III-codes", annex3_rows)
+        write_section_summary("annex-IV-individual-results", annex4_rows)
+
+        handle.write("\n")
+
+        # -------------------------------------------------------------------
+        # Full inventory table
+        # -------------------------------------------------------------------
+        handle.write("FULL FILE INVENTORY\n")
+        handle.write("-------------------\n")
+
+        header = (
+            f"{'SECTION':<{section_w}}  "
+            f"{'ITEM':>{item_w}}  "
+            f"{'VERSION':<{version_w}}  "
+            f"{'SIZE_KB':>{size_w}}  "
+            f"{'STATUS':<{status_w}}  "
+            f"{'SHORT_NAME':<{short_name_w}}  "
+            f"REL_PATH"
+        )
+
+        separator = (
+            f"{'-' * section_w}  "
+            f"{'-' * item_w}  "
+            f"{'-' * version_w}  "
+            f"{'-' * size_w}  "
+            f"{'-' * status_w}  "
+            f"{'-' * short_name_w}  "
+            f"{'-' * 40}"
+        )
+
+        handle.write(header + "\n")
+        handle.write(separator + "\n")
 
         for row in rows:
-            writer.writerow(asdict(row))
+            status = generic_status(row)
+
+            handle.write(
+                f"{truncate(row.section, section_w):<{section_w}}  "
+                f"{format_item_no(row.item_no):>{item_w}}  "
+                f"{truncate(row.version or '', version_w):<{version_w}}  "
+                f"{row.size_kb:>{size_w}.1f}  "
+                f"{status:<{status_w}}  "
+                f"{truncate(row.short_name or '', short_name_w):<{short_name_w}}  "
+                f"{row.rel_path}\n"
+            )
+
+        handle.write("\n")
+
+        # -------------------------------------------------------------------
+        # Minimal notes
+        # -------------------------------------------------------------------
+        handle.write("ANNEX NOTES\n")
+        handle.write("-----------\n")
+        handle.write("- No special annex notes.\n")
+
+        handle.write("\n")
+
+        handle.write("WARNINGS / MANUAL CHECKS\n")
+        handle.write("------------------------\n")
+
+        warning_lines: list[str] = []
+
+        # Only report unusual cases here:
+        # placeholder flagged, but version is not v00.
+        suspicious_non_v00 = [
+            row for row in rows
+            if row.placeholder_likely and row.version not in {None, "00"}
+        ]
+
+        for row in suspicious_non_v00:
+            warning_lines.append(
+                f"Check manually: {row.rel_path} is v{row.version or '-'} "
+                f"but was flagged as placeholder ({row.placeholder_reason})."
+            )
+
+        if warning_lines:
+            for line in warning_lines:
+                handle.write(f"- {line}\n")
+        else:
+            handle.write("- No unusual manual checks.\n")
 
 
 def write_json(rows: list[InventoryRow], path: Path) -> None:
     """
     Write the inventory rows to JSON.
-
-    Parameters
-    ----------
-    rows : list[InventoryRow]
-        Inventory rows to export.
-
-    path : Path
-        Output JSON path.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -387,11 +412,6 @@ def write_json(rows: list[InventoryRow], path: Path) -> None:
 def print_summary(rows: list[InventoryRow]) -> None:
     """
     Print a short console summary after inventory generation.
-
-    Parameters
-    ----------
-    rows : list[InventoryRow]
-        Inventory rows that were generated.
     """
     by_section: dict[str, int] = {}
     placeholder_by_section: dict[str, int] = {}
@@ -418,7 +438,7 @@ def print_summary(rows: list[InventoryRow]) -> None:
         print(f"  {section}: {count}")
 
     print()
-    print(f"CSV : {CSV_PATH}")
+    print(f"TXT : {TXT_PATH}")
     print(f"JSON: {JSON_PATH}")
 
 
@@ -429,22 +449,9 @@ def print_summary(rows: list[InventoryRow]) -> None:
 def main() -> int:
     """
     Run the full inventory generation workflow.
-
-    Steps
-    -----
-    1. Scan source files
-    2. Build structured inventory rows
-    3. Write CSV output
-    4. Write JSON output
-    5. Print console summary
-
-    Returns
-    -------
-    int
-        Exit code suitable for command-line usage.
     """
     rows = build_inventory()
-    write_csv(rows, CSV_PATH)
+    write_text_report(rows, TXT_PATH)
     write_json(rows, JSON_PATH)
     print_summary(rows)
     return 0
