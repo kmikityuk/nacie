@@ -11,6 +11,9 @@ from typing import Optional
 
 import yaml
 from docx import Document
+from docx.document import Document as _Document
+from docx.table import Table
+from docx.text.paragraph import Paragraph
 
 
 # ---------------------------------------------------------------------------
@@ -126,13 +129,6 @@ def slugify(value: str) -> str:
 def build_document_id(section: str, item_no: Optional[int], short_name: str) -> str:
     """
     Build a stable internal document identifier.
-
-    Examples:
-      chapter03
-      annexii_11_kit
-      annexiii_21_sam-moose-scm
-      annexiv_01_anl
-      annexi_technical_specification
     """
     short_slug = slugify(short_name)
 
@@ -251,11 +247,6 @@ def get_paragraph_style_name(paragraph) -> str:
 def infer_heading_level(style_name: str, paragraph_text: str) -> Optional[int]:
     """
     Infer a heading level from the paragraph style and text.
-
-    This is intentionally conservative:
-    - H1 / Heading 1 -> level 1
-    - H2 / Heading 2 -> level 2
-    - H3 / Heading 3 -> level 3
     """
     style = style_name.strip().lower()
 
@@ -294,6 +285,20 @@ def is_references_heading(text: str) -> bool:
     }
 
 
+def iter_block_items(parent: _Document):
+    """
+    Yield paragraphs and tables from a document body in order.
+
+    This is the key helper for preserving body order.
+    """
+    body = parent.element.body
+    for child in body.iterchildren():
+        if child.tag.endswith("}p"):
+            yield Paragraph(child, parent)
+        elif child.tag.endswith("}tbl"):
+            yield Table(child, parent)
+
+
 # ---------------------------------------------------------------------------
 # Inline marker extraction
 # ---------------------------------------------------------------------------
@@ -301,6 +306,7 @@ def is_references_heading(text: str) -> bool:
 _REF_NUM_PATTERN = re.compile(r"\[(\d+)\]")
 _FIG_NUM_PATTERN = re.compile(r"\b(?:Figure|FIG\.?|Fig\.?)\s+(\d+)[.-](\d+)\b")
 _TAB_NUM_PATTERN = re.compile(r"\b(?:Table|TABLE)\s+(\d+)[.-](\d+)\b")
+
 
 def paragraph_text_with_markers(
     text: str,
@@ -311,18 +317,10 @@ def paragraph_text_with_markers(
     Convert obvious local reference, figure, and table mentions into internal
     placeholders.
 
-    Examples:
-      [4]          -> {REF:chapter03_local_004}
-      Figure 3-1   -> {FIG:chapter03_001}
-      Fig. 3-2     -> {FIG:chapter03_002}
-      Table 3-1    -> {TAB:chapter03_001}
-
-    Notes
-    -----
-    - The chapter/section number in the visible source text is ignored for the
-      internal ID. We trust the current normalized document_id and use the
-      trailing local item number as the internal sequence number.
-    - This is still a heuristic pass and may need refinement later.
+    Rules:
+    - bibliography references stay as {REF:...}
+    - figure mentions in running text become {FIG_REF:...}
+    - table mentions in running text become {TAB_REF:...}
     """
     def repl_ref(match: re.Match[str]) -> str:
         num = match.group(1)
@@ -332,12 +330,12 @@ def paragraph_text_with_markers(
 
     def repl_fig(match: re.Match[str]) -> str:
         local_num = int(match.group(2))
-        key = f"FIG:{document_id}_{local_num:03d}"
+        key = f"FIG_REF:{document_id}_{local_num:03d}"
         return "{" + key + "}"
 
     def repl_tab(match: re.Match[str]) -> str:
         local_num = int(match.group(2))
-        key = f"TAB:{document_id}_{local_num:03d}"
+        key = f"TAB_REF:{document_id}_{local_num:03d}"
         return "{" + key + "}"
 
     text = _REF_NUM_PATTERN.sub(repl_ref, text)
@@ -361,8 +359,8 @@ def extract_images_from_docx(
     Returns
     -------
     list[dict]
-        Metadata for extracted image assets in source order as far as the ZIP
-        layout allows. In v1 we do not map exact image positions to paragraphs.
+        Metadata for extracted image assets. In this version we still do not map
+        exact image positions to body paragraphs.
     """
     ensure_dir(images_dir)
 
@@ -396,54 +394,45 @@ def extract_images_from_docx(
 # Table extraction
 # ---------------------------------------------------------------------------
 
-def extract_tables(
-    doc: Document,
+def extract_table_rows(table: Table) -> list[list[str]]:
+    """
+    Convert a python-docx table object into a list of rows.
+    """
+    rows: list[list[str]] = []
+    for row in table.rows:
+        row_values = []
+        for cell in row.cells:
+            row_values.append(cell.text.strip())
+        rows.append(row_values)
+    return rows
+
+
+def write_table_yaml(
+    rows: list[list[str]],
     tables_dir: Path,
     document_id: str,
-) -> list[dict]:
+    table_index: int,
+) -> dict:
     """
-    Extract Word tables into separate YAML files.
-
-    Returns
-    -------
-    list[dict]
-        Metadata for normalized table assets.
+    Write one extracted table to YAML and return its metadata.
     """
-    ensure_dir(tables_dir)
+    table_name = f"{document_id}_table_{table_index:03d}.yaml"
+    out_path = tables_dir / table_name
 
-    table_records: list[dict] = []
-
-    for index, table in enumerate(doc.tables, start=1):
-        rows = []
-        for row in table.rows:
-            row_values = []
-            for cell in row.cells:
-                row_values.append(cell.text.strip())
-            rows.append(row_values)
-
-        table_name = f"{document_id}_table_{index:03d}.yaml"
-        out_path = tables_dir / table_name
-
-        with out_path.open("w", encoding="utf-8") as handle:
-            yaml.safe_dump(
-                {
-                    "rows": rows,
-                },
-                handle,
-                sort_keys=False,
-                allow_unicode=True,
-            )
-
-        table_records.append(
-            {
-                "table_index": index,
-                "file": f"tables/{table_name}",
-                "rows": len(rows),
-                "cols": max((len(r) for r in rows), default=0),
-            }
+    with out_path.open("w", encoding="utf-8") as handle:
+        yaml.safe_dump(
+            {"rows": rows},
+            handle,
+            sort_keys=False,
+            allow_unicode=True,
         )
 
-    return table_records
+    return {
+        "table_index": table_index,
+        "file": f"tables/{table_name}",
+        "rows": len(rows),
+        "cols": max((len(r) for r in rows), default=0),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -455,11 +444,6 @@ def extract_reference_entries(doc: Document, document_id: str) -> list[dict]:
     Extract bibliography entries from either:
     1. paragraphs that begin with [n]
     2. paragraphs located under a heading such as 'References'
-
-    This is a conservative first pass:
-    - numbered references keep their numeric order if present
-    - plain reference paragraphs inside a References section are also captured
-    - entries are deduplicated by raw_text
     """
     refs: list[dict] = []
 
@@ -524,124 +508,173 @@ def extract_reference_entries(doc: Document, document_id: str) -> list[dict]:
 # Block extraction
 # ---------------------------------------------------------------------------
 
+def table_preceding_caption_candidate(last_paragraph_text: str) -> bool:
+    """
+    Return True if the previous paragraph looks like a table caption.
+    """
+    text = last_paragraph_text.strip()
+    if not text:
+        return False
+
+    lowered = text.lower()
+    return (
+        lowered.startswith("table ")
+        or lowered.startswith("{tab_ref:")
+        or lowered.startswith("{tab_cap:")
+    )
+
+
 def extract_blocks(
     doc: Document,
     info: SourceInfo,
+    tables_dir: Path,
     image_records: list[dict],
-    table_records: list[dict],
     warnings: list[str],
 ) -> list[dict]:
     """
     Extract a conservative ordered block list from the document.
 
-    v1 behaviour:
-    - headings from paragraph styles
-    - paragraphs from non-empty text paragraphs
+    Updated behaviour:
+    - preserve body order for paragraphs and tables
     - paragraphs inside a References section are excluded from blocks and stored
       only in the references list
-    - append figure blocks after textual extraction if images exist
-    - append table blocks after textual extraction if tables exist
-
-    This does not yet reconstruct exact interleaving of figures/tables with
-    surrounding paragraphs. That refinement can come in v2.
+    - tables are emitted where they appear in the document body
+    - figures are still appended later because image-position mapping is not yet
+      implemented
     """
     blocks: list[dict] = []
     local_ref_map: dict[str, str] = {}
     in_references_section = False
+    table_index = 0
+    last_nonempty_paragraph_text = ""
 
-    for paragraph in doc.paragraphs:
-        text = paragraph.text.strip()
-        style_name = get_paragraph_style_name(paragraph)
+    for item in iter_block_items(doc):
+        if isinstance(item, Paragraph):
+            text = item.text.strip()
+            style_name = get_paragraph_style_name(item)
 
-        if not text:
-            continue
+            if not text:
+                continue
 
-        heading_level = infer_heading_level(style_name, text)
+            heading_level = infer_heading_level(style_name, text)
 
-        if heading_level is not None and is_references_heading(text):
-            in_references_section = True
+            if heading_level is not None and is_references_heading(text):
+                in_references_section = True
+                blocks.append(
+                    {
+                        "type": "heading",
+                        "level": heading_level,
+                        "text": text,
+                        "style": style_name or None,
+                    }
+                )
+                last_nonempty_paragraph_text = text
+                continue
+
+            if heading_level is not None and in_references_section:
+                in_references_section = False
+
+            if heading_level is not None:
+                blocks.append(
+                    {
+                        "type": "heading",
+                        "level": heading_level,
+                        "text": text,
+                        "style": style_name or None,
+                    }
+                )
+                last_nonempty_paragraph_text = text
+                continue
+
+            match = re.match(r"^\[(\d+)\]\s*(.+)$", text)
+            if match:
+                # Numbered bibliography entry: keep it out of body blocks.
+                last_nonempty_paragraph_text = text
+                continue
+
+            if in_references_section:
+                # Plain bibliography entry under a References heading: keep it out
+                # of body blocks, it will go to references: only.
+                last_nonempty_paragraph_text = text
+                continue
+
+            normalized_text = paragraph_text_with_markers(
+                text=text,
+                local_ref_map=local_ref_map,
+                document_id=info.document_id,
+            )
             blocks.append(
                 {
-                    "type": "heading",
-                    "level": heading_level,
-                    "text": text,
+                    "type": "paragraph",
+                    "text": normalized_text,
                     "style": style_name or None,
                 }
             )
+            last_nonempty_paragraph_text = text
             continue
 
-        if heading_level is not None and in_references_section:
-            in_references_section = False
+        if isinstance(item, Table):
+            if in_references_section:
+                warnings.append(
+                    "A table was found inside the references section and was kept in body order; review manually."
+                )
 
-        if heading_level is not None:
+            table_index += 1
+            rows = extract_table_rows(item)
+            table_meta = write_table_yaml(
+                rows=rows,
+                tables_dir=tables_dir,
+                document_id=info.document_id,
+                table_index=table_index,
+            )
+
+            table_id = f"{info.document_id}_{table_index:03d}"
+
+            caption = ""
+            if table_preceding_caption_candidate(last_nonempty_paragraph_text):
+                candidate = paragraph_text_with_markers(
+                    text=last_nonempty_paragraph_text,
+                    local_ref_map=local_ref_map,
+                    document_id=info.document_id,
+                )
+                if candidate.startswith("{TAB_REF:"):
+                    caption_text = candidate + " "
+                    caption = "{TAB_CAP:" + table_id + "} " + caption_text
+                elif candidate.startswith("{TAB_CAP:"):
+                    caption = candidate
+
             blocks.append(
                 {
-                    "type": "heading",
-                    "level": heading_level,
-                    "text": text,
-                    "style": style_name or None,
+                    "type": "table",
+                    "id": f"TAB:{table_id}",
+                    "caption": caption,
+                    "file": table_meta["file"],
                 }
             )
-            continue
 
-        match = re.match(r"^\[(\d+)\]\s*(.+)$", text)
-        if match:
-            # Numbered bibliography entry: keep it out of body blocks.
-            continue
+            if not caption:
+                warnings.append(
+                    f"Table TAB:{table_id} extracted in body order but without automatic caption detection; caption must be reviewed manually."
+                )
 
-        if in_references_section:
-            # Plain bibliography entry under a References heading: keep it out of
-            # body blocks, it will go to references: only.
-            continue
-
-        normalized_text = paragraph_text_with_markers(
-            text=text,
-            local_ref_map=local_ref_map,
-            document_id=info.document_id,
-        )
-        blocks.append(
-            {
-                "type": "paragraph",
-                "text": normalized_text,
-                "style": style_name or None,
-            }
-        )
-
-    for index, table_meta in enumerate(table_records, start=1):
-        table_id = f"TAB:{info.document_id}_{index:03d}"
-        blocks.append(
-            {
-                "type": "table",
-                "id": table_id,
-                "caption": "",
-                "file": table_meta["file"],
-            }
-        )
-        warnings.append(
-            f"Table {table_id} extracted without automatic caption detection; caption must be reviewed manually."
-        )
-
+    # Keep figures as trailing blocks for now, but use FIG_CAP for caption role.
     for index, image_meta in enumerate(image_records, start=1):
-        fig_id = f"FIG:{info.document_id}_{index:03d}"
+        fig_id = f"{info.document_id}_{index:03d}"
         blocks.append(
             {
                 "type": "figure",
-                "id": fig_id,
+                "id": f"FIG:{fig_id}",
                 "image": image_meta["relative_path"],
-                "caption": "",
+                "caption": "{FIG_CAP:" + fig_id + "} ",
             }
         )
         warnings.append(
-            f"Figure {fig_id} extracted without automatic caption detection; caption must be reviewed manually."
+            f"Figure FIG:{fig_id} extracted without automatic position/caption detection; review manually."
         )
 
     if image_records:
         warnings.append(
-            "In-text figure references are not automatically resolved in v1; review manually."
-        )
-    if table_records:
-        warnings.append(
-            "In-text table references are not automatically resolved in v1; review manually."
+            "In-text figure references are converted to FIG_REF fields, but figure placement is not yet reconstructed from body order."
         )
 
     return blocks
@@ -749,17 +782,12 @@ def normalize_one_docx(
         images_dir=images_dir,
         document_id=info.document_id,
     )
-    table_records = extract_tables(
-        doc=doc,
-        tables_dir=tables_dir,
-        document_id=info.document_id,
-    )
 
     blocks = extract_blocks(
         doc=doc,
         info=info,
+        tables_dir=tables_dir,
         image_records=image_records,
-        table_records=table_records,
         warnings=warnings,
     )
 
@@ -774,8 +802,8 @@ def normalize_one_docx(
         warnings.append("No explicit bibliography entries were extracted.")
     if image_records and not any(block["type"] == "figure" for block in blocks):
         warnings.append("Images were extracted but no figure blocks were created.")
-    if table_records and not any(block["type"] == "table" for block in blocks):
-        warnings.append("Tables were extracted but no table blocks were created.")
+    if not any(block["type"] == "table" for block in blocks) and len(doc.tables) > 0:
+        warnings.append("Tables exist in the DOCX but no table blocks were created.")
 
     content_yaml_path = normalized_dir / "content.yaml"
     warnings_yaml_path = normalized_dir / "warnings.yaml"
