@@ -21,9 +21,10 @@ blocks:
     mm) each 2.4 m in length. A prototypical wire-spaced fuel pin bundle simulator (FPS) is installed
     in the lower section of the riser. The FPS and its associated instrumentation are described in detail
     in subsequent sections. A heat exchanger (HX) is located in the upper portion of the downcomer, as
-    illustrated in Figure 3-1; a comprehensive description of the HX is provided later. The vertical distance
-    between the center of the heated section and the center of the heat exchanger, H, is 5.5 m. For the
-    experiments discussed in this work, only the high-power section of the heat exchanger was employed.
+    illustrated in {FIG:chapter03_001}; a comprehensive description of the HX is provided later. The vertical
+    distance between the center of the heated section and the center of the heat exchanger, H, is 5.5
+    m. For the experiments discussed in this work, only the high-power section of the heat exchanger was
+    employed.
   style: Normal
 - type: paragraph
   text: An argon gas injection system is installed within the riser to provide the driving force required
@@ -33,23 +34,23 @@ blocks:
   style: Normal
 - type: paragraph
   text: The primary system is instrumented with eight bulk thermocouples (TP101–TP107 and TP310) to measure
-    the fluid temperature along the flow path of the loop. The thermocouple locations are shown in Figure
-    3-2. The FPS test section is equipped with a total of 67 thermocouples, arranged to monitor different
-    subchannel ranks at various axial and radial positions.
+    the fluid temperature along the flow path of the loop. The thermocouple locations are shown in {FIG:chapter03_002}.
+    The FPS test section is equipped with a total of 67 thermocouples, arranged to monitor different subchannel
+    ranks at various axial and radial positions.
   style: Normal
 - type: paragraph
   text: The primary loop is also thermally insulated with a mineral rock-wool layer bonded by a thermosetting
-    resin. The thermal conductivity of the resin is temperature dependent, as reported in Table 3-1 (manufacturer-provided
-    data). The insulation thickness is 100 mm along the entire loop.
+    resin. The thermal conductivity of the resin is temperature dependent, as reported in {TAB:chapter03_001}
+    (manufacturer-provided data). The insulation thickness is 100 mm along the entire loop.
   style: Normal
 - type: paragraph
-  text: Table 3-1 Thermal conductivity (k) of the thermal insulator
+  text: '{TAB:chapter03_001} Thermal conductivity (k) of the thermal insulator'
   style: Caption
 - type: paragraph
-  text: 'Figure 3-1: Schematic representation of the NACIE-UP primary loop.'
+  text: '{FIG:chapter03_001}: Schematic representation of the NACIE-UP primary loop.'
   style: Normal
 - type: paragraph
-  text: 'Figure 3-2: Layout of NACIE-UP facility.'
+  text: '{FIG:chapter03_002}: Layout of NACIE-UP facility.'
   style: Normal
 - type: heading
   level: 2
@@ -86,10 +87,10 @@ blocks:
   style: Heading 2
 - type: paragraph
   text: A prototypical thermal flow meter (FM101) was used to measure the LBE mass flow rate in the loop.
-    The thermal flow meter is based on the energy balance and it is shown schematically in Figure 3-3.
+    The thermal flow meter is based on the energy balance and it is shown schematically in {FIG:chapter03_003}.
   style: Normal
 - type: paragraph
-  text: 'Figure 3-3: Schematic view of the thermal flow meter.'
+  text: '{FIG:chapter03_003}: Schematic view of the thermal flow meter.'
   style: Caption
 - type: paragraph
   text: 'The component is made by a flanged pipe (SS) with an heater developed by Thermocoax (6 kW maximum
@@ -142,14 +143,14 @@ blocks:
     is 2000 mm, while the heated (active) length is 600 mm. Spacer wires are helically wrapped around
     each pin with an axial pitch of Pw = 262 mm. The maximum thermal power of the bundle is approximately
     250 kW, corresponding to a peak wall heat flux of about 1 MW/m². The main FPS design parameters are
-    summarized in Table 3-2. The pin dimensions and overall structure are representative of the MYRRHA
-    fuel assembly design.
+    summarized in {TAB:chapter03_002}. The pin dimensions and overall structure are representative of
+    the MYRRHA fuel assembly design.
   style: Normal
 - type: paragraph
   text: The main geometrical dimensions of the fuel bundle, together with an overall sketch of the cross
-    section, are shown in Figure 3-4. The total flow area is conventionally subdivided into 54 subchannels
-    of different ranks (S1–S54). The pins and subchannels are numbered to facilitate their identification
-    and the reference to the associated instrumentation.
+    section, are shown in {FIG:chapter03_004}. The total flow area is conventionally subdivided into 54
+    subchannels of different ranks (S1–S54). The pins and subchannels are numbered to facilitate their
+    identification and the reference to the associated instrumentation.
   style: Normal
 - type: paragraph
   text: The inner rank consists of the central pin No. 1 and subchannels S1–S6; the intermediate rank
@@ -158,20 +159,20 @@ blocks:
   style: Normal
 - type: paragraph
   text: The overall layout of the fuel pin bundle simulator, including its main dimensions, is illustrated
-    in Figure 3-5 and provided separately. In addition, a detailed drawing of a single pin with the spacer
-    wire is supplied. At the pin foot, a bottom grid is installed to maintain the structural integrity
-    of the bundle, while the conical section allows elastic bending of the pins, which is required for
-    the correct installation of the electrical connectors. A drawing of the bottom grid, which is the
-    only component required for numerical fluid-dynamics modeling, is provided separately to the participants.
+    in {FIG:chapter03_005} and provided separately. In addition, a detailed drawing of a single pin with
+    the spacer wire is supplied. At the pin foot, a bottom grid is installed to maintain the structural
+    integrity of the bundle, while the conical section allows elastic bending of the pins, which is required
+    for the correct installation of the electrical connectors. A drawing of the bottom grid, which is
+    the only component required for numerical fluid-dynamics modeling, is provided separately to the participants.
   style: Normal
 - type: paragraph
-  text: 'Table 3-2: FPS design parameters'
+  text: '{TAB:chapter03_002}: FPS design parameters'
   style: Caption
 - type: paragraph
-  text: 'Figure 3-4: cross-section of the electrical wire-spaced FPS.'
+  text: '{FIG:chapter03_004}: cross-section of the electrical wire-spaced FPS.'
   style: Caption
 - type: paragraph
-  text: Figure 3-5 FPS layout.
+  text: '{FIG:chapter03_005} FPS layout.'
   style: Caption
 - type: heading
   level: 2
@@ -179,10 +180,11 @@ blocks:
   style: Heading 2
 - type: paragraph
   text: Pins No. 1, 2, 4, 5, 6, 7, 9, 16, 18, and 19 are instrumented with wall-embedded thermocouples
-    located on one or more generatrices parallel to the pin axis, as summarized in Table 3-3 and illustrated
-    in Figure 3-6. Three axial measurement levels are considered, at z = 38, 300, and 562 mm measured
-    from the bottom of the active pin region, as shown in Figure 3-6(a). By convention, the measurement
-    planes at z = 38, 300, and 562 mm are referred to as Sections A, B, and C, respectively.
+    located on one or more generatrices parallel to the pin axis, as summarized in {TAB:chapter03_003}
+    and illustrated in {FIG:chapter03_006}. Three axial measurement levels are considered, at z = 38,
+    300, and 562 mm measured from the bottom of the active pin region, as shown in {FIG:chapter03_006}(a).
+    By convention, the measurement planes at z = 38, 300, and 562 mm are referred to as Sections A, B,
+    and C, respectively.
   style: Normal
 - type: paragraph
   text: The selected measurement sections share the same geometrical configuration, since the wire pitch
@@ -193,32 +195,34 @@ blocks:
   style: Normal
 - type: paragraph
   text: Subchannels S2, S5, S22, S26, and S33 are instrumented with bulk thermocouples of 0.5 mm diameter
-    at the same three measurement sections A, B, and C (see Table 3-4). A schematic view of a generic
-    measurement section, including both wall-embedded thermocouples and instrumented subchannels, is shown
-    in Figure 3-6 (b). The relative positions of the grooves, i.e., the generatrices (highlighted in red)
-    for the different pins, can also be inferred by considering the reference azimuthal pin angle θ, defined
-    as positive in the anticlockwise direction when the bundle cross section is viewed from the top.
+    at the same three measurement sections A, B, and C (see {TAB:chapter03_004}). A schematic view of
+    a generic measurement section, including both wall-embedded thermocouples and instrumented subchannels,
+    is shown in {FIG:chapter03_006} (b). The relative positions of the grooves, i.e., the generatrices
+    (highlighted in red) for the different pins, can also be inferred by considering the reference azimuthal
+    pin angle θ, defined as positive in the anticlockwise direction when the bundle cross section is viewed
+    from the top.
   style: Normal
 - type: paragraph
-  text: Table 3-5 summarizes all the relevant information associated with the thermocouples, including
-    the pin or wire number, thermocouple type (‘Wall’ or ‘Bulk’), thermocouple diameter, subchannel number
-    for bulk thermocouples, azimuthal angle, axial z location measured from the beginning of the active
-    region, and the corresponding measurement section (A, B, or C). In cases where the information is
-    not defined, the symbol “–” is used.
+  text: '{TAB:chapter03_005} summarizes all the relevant information associated with the thermocouples,
+    including the pin or wire number, thermocouple type (‘Wall’ or ‘Bulk’), thermocouple diameter, subchannel
+    number for bulk thermocouples, azimuthal angle, axial z location measured from the beginning of the
+    active region, and the corresponding measurement section (A, B, or C). In cases where the information
+    is not defined, the symbol “–” is used.'
   style: Normal
 - type: paragraph
-  text: 'Figure 3-6: Axial (a) and section (b) locations of wall embedded and bulk TCs for pins n. 1,3,
-    2, 4, 5, 6, 7, 9, 16, 18, 19.'
+  text: '{FIG:chapter03_006}: Axial (a) and section (b) locations of wall embedded and bulk TCs for pins
+    n. 1,3, 2, 4, 5, 6, 7, 9, 16, 18, 19.'
   style: Caption
 - type: paragraph
-  text: Table 3-3:Azimuthal angles of the pin generatrices where the wall embedded Thermocouples are located.
+  text: '{TAB:chapter03_003}:Azimuthal angles of the pin generatrices where the wall embedded Thermocouples
+    are located.'
   style: Caption
 - type: paragraph
-  text: 'Table 3-4: Azimuthal angles of the generatrices where the bulk Thermocouples are located for
-    each sub-channel instrumented.'
+  text: '{TAB:chapter03_004}: Azimuthal angles of the generatrices where the bulk Thermocouples are located
+    for each sub-channel instrumented.'
   style: Caption
 - type: paragraph
-  text: 'Table 3-5: Thermocouples names with all the relevant information associated.'
+  text: '{TAB:chapter03_005}: Thermocouples names with all the relevant information associated.'
   style: Caption
 - type: heading
   level: 2
@@ -228,9 +232,9 @@ blocks:
   text: 'The heat exchanger is of the shell-and-tube type and is designed to transfer thermal power up
     to 250 kW. It consists of two separate shell sections: a low-power crossflow section (0–30 kW) and
     a high-power counter-current section (30–250 kW), both connected to the pressurized-water secondary
-    side. The two sections can be independently drained and filled (see Figure 3-1 and Figure 3-2). The
-    tube geometry follows a “tube-in-tube” configuration, with an annular gap of 2.45 mm filled with AISI
-    316 powder.'
+    side. The two sections can be independently drained and filled (see {FIG:chapter03_001} and {FIG:chapter03_002}).
+    The tube geometry follows a “tube-in-tube” configuration, with an annular gap of 2.45 mm filled with
+    AISI 316 powder.'
   style: Normal
 - type: paragraph
   text: The secondary side is a closed-loop pressurized water circuit operating at 16 bar and equipped
@@ -254,21 +258,21 @@ blocks:
   text: The heat exchanger features double walls filled with AISI stainless-steel powder; therefore, an
     accurate numerical modeling of the heat exchanger is essential to correctly predict the average LBE
     temperature in the loop under all the investigated operating conditions. A technical drawing of the
-    heat exchanger is provided in Figure 3-7.
+    heat exchanger is provided in {FIG:chapter03_007}.
   style: Normal
 - type: paragraph
-  text: Figure 3-7 Technical drawing of the Heat Exchanger.
+  text: '{FIG:chapter03_007} Technical drawing of the Heat Exchanger.'
   style: Caption
 - type: paragraph
   text: During the blind phase of a previous benchmark conducted within the SESAME project, the predicted
     average temperatures were significantly lower than the corresponding experimental values for all three
-    tests. As illustrated in Figure 3-8 for Test-3, the simulated average temperature remains well below
-    the measured value throughout the entire test duration, with deviations ranging from approximately
+    tests. As illustrated in {FIG:chapter03_008} for Test-3, the simulated average temperature remains
+    well below the measured value throughout the entire test duration, with deviations ranging from approximately
     50 to 30 °C relative to the experimental data.
   style: Normal
 - type: paragraph
-  text: 'Figure 3-8: Comparison of the average loop temperature (blind simulation and experimental data,
-    Test-3).'
+  text: '{FIG:chapter03_008}: Comparison of the average loop temperature (blind simulation and experimental
+    data, Test-3).'
   style: Caption
 - type: paragraph
   text: This inconsistency made a more detailed analysis of the previous heat exchanger (HX) “blind model”
@@ -281,11 +285,11 @@ blocks:
 - type: paragraph
   text: Based on more reliable experimental data {REF:chapter03_local_002}, it was concluded that the
     powder thermal conductivity assumed in the blind simulations was overestimated. The powder thermal
-    conductivity reported in {REF:chapter03_local_002} is summarized in Figure 3-9, which shows experimental
-    correlations as a function of temperature for three increasing powder compaction levels, denoted as
-    RUN 0.0, 1.0, and 5.0 (dotted lines). The figure also includes the thermal conductivity adopted in
-    the blind RELAP5 simulations (blue line) and the updated value used in the post-test RELAP5 analyses
-    (red line).
+    conductivity reported in {REF:chapter03_local_002} is summarized in {FIG:chapter03_009}, which shows
+    experimental correlations as a function of temperature for three increasing powder compaction levels,
+    denoted as RUN 0.0, 1.0, and 5.0 (dotted lines). The figure also includes the thermal conductivity
+    adopted in the blind RELAP5 simulations (blue line) and the updated value used in the post-test RELAP5
+    analyses (red line).
   style: Normal
 - type: paragraph
   text: 'A systematic post-test analysis performed with RELAP5 {REF:chapter03_local_003} allowed an analytical
@@ -302,7 +306,7 @@ blocks:
     tube thicknesses, these were taken directly from the design drawings {REF:chapter03_local_004}.
   style: Normal
 - type: paragraph
-  text: 'Figure 3-9: Stainless steel powder thermal conductivity.'
+  text: '{FIG:chapter03_009}: Stainless steel powder thermal conductivity.'
   style: Caption
 - type: heading
   level: 2
@@ -313,7 +317,7 @@ blocks:
     of a 12.70 mm (1/2 inch) outer-diameter pipe, 6135 mm in length, which is inserted through the 2½″
     coupling flange located at the top of the expansion tank by means of a Swagelok tube fitting. Technical
     drawings of the terminal section of the device, including its functional dimensions, are shown in
-    Figure 3-10.
+    {FIG:chapter03_010}.
   style: Normal
 - type: paragraph
   text: The gas is discharged through five holes, each with a diameter of 1 mm, aligned along a generatrix
@@ -321,7 +325,7 @@ blocks:
     to the main 6135 mm pipe and are mutually oriented at 90° with respect to each other {REF:chapter03_local_005}.
   style: Normal
 - type: paragraph
-  text: 'Figure 3-10: Technical drawings of the gas injection device.'
+  text: '{FIG:chapter03_010}: Technical drawings of the gas injection device.'
   style: Normal
 - type: paragraph
   text: With regard to the gas injection system, the control unit allows the argon volumetric flow rate
@@ -351,10 +355,10 @@ blocks:
     for facility operation. The low-level sensor (LD102) is positioned 150 mm from the top of the incoming
     vertical nozzle (i.e., 150 + 285 = 435 mm from the bottom of the expansion vessel), while the high-level
     sensor (LD101) is located 230 mm from the top of the same nozzle. A cross-sectional view of the expansion
-    vessel (S101) is shown in Figure 3-11.
+    vessel (S101) is shown in {FIG:chapter03_011}.
   style: Normal
 - type: paragraph
-  text: 'Figure 3-11: cross-section of expansion vessel.'
+  text: '{FIG:chapter03_011}: cross-section of expansion vessel.'
   style: Caption
 - type: heading
   level: 2
@@ -364,27 +368,27 @@ blocks:
   text: The Data Acquisition and Control System (DACS) is implemented using LabVIEW System Design Software
     in combination with National Instruments hardware. Both the primary and secondary systems of the NACIE-UP
     facility are remotely controlled, and the filling and draining operations of the plant are also performed
-    remotely. Figure 3-12 presents the control and monitoring interface used to remotely actuate components
-    and valves, from which temperatures and pressures in the primary and secondary systems are continuously
-    monitored.
+    remotely. {FIG:chapter03_012} presents the control and monitoring interface used to remotely actuate
+    components and valves, from which temperatures and pressures in the primary and secondary systems
+    are continuously monitored.
   style: Normal
 - type: paragraph
-  text: Figure 3-13 shows the remote-control panel dedicated to the activation and regulation of power
-    generation. The power level, the number of energized pins, and the power ramp rate can be adjusted
-    as required, as illustrated in the same figure. In addition, all wall and bulk thermocouples within
-    the fuel pin bundle simulator can be continuously monitored through the interface shown in Figure
-    3-14. Each pin can be controlled independently, enabling the execution of asymmetric heating tests
-    for code validation purposes. Transitions between different power levels can also be performed through
-    controlled power ramps.
+  text: '{FIG:chapter03_013} shows the remote-control panel dedicated to the activation and regulation
+    of power generation. The power level, the number of energized pins, and the power ramp rate can be
+    adjusted as required, as illustrated in the same figure. In addition, all wall and bulk thermocouples
+    within the fuel pin bundle simulator can be continuously monitored through the interface shown in
+    {FIG:chapter03_014}. Each pin can be controlled independently, enabling the execution of asymmetric
+    heating tests for code validation purposes. Transitions between different power levels can also be
+    performed through controlled power ramps.'
   style: Normal
 - type: paragraph
-  text: 'Figure 3-12: Remote control panel of the NACIE-UP facility.'
+  text: '{FIG:chapter03_012}: Remote control panel of the NACIE-UP facility.'
   style: Normal
 - type: paragraph
-  text: 'Figure 3-13: Control panel of the Fuel Pin simulator power.'
+  text: '{FIG:chapter03_013}: Control panel of the Fuel Pin simulator power.'
   style: Normal
 - type: paragraph
-  text: 'Figure 3-14: Monitoring panel of the FPS temperatures.'
+  text: '{FIG:chapter03_014}: Monitoring panel of the FPS temperatures.'
   style: Normal
 - type: heading
   level: 2

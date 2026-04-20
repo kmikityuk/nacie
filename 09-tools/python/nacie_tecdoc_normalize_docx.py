@@ -299,7 +299,8 @@ def is_references_heading(text: str) -> bool:
 # ---------------------------------------------------------------------------
 
 _REF_NUM_PATTERN = re.compile(r"\[(\d+)\]")
-
+_FIG_NUM_PATTERN = re.compile(r"\b(?:Figure|FIG\.?|Fig\.?)\s+(\d+)[.-](\d+)\b")
+_TAB_NUM_PATTERN = re.compile(r"\b(?:Table|TABLE)\s+(\d+)[.-](\d+)\b")
 
 def paragraph_text_with_markers(
     text: str,
@@ -307,12 +308,21 @@ def paragraph_text_with_markers(
     document_id: str,
 ) -> str:
     """
-    Convert some obvious local citation markers into internal placeholders.
+    Convert obvious local reference, figure, and table mentions into internal
+    placeholders.
 
-    This is intentionally conservative. It only rewrites references like [7]
-    into {REF:<document_id>_local_007}. Figures/tables are not rewritten
-    automatically here because in many source documents they are ambiguous and
-    require spatial context.
+    Examples:
+      [4]          -> {REF:chapter03_local_004}
+      Figure 3-1   -> {FIG:chapter03_001}
+      Fig. 3-2     -> {FIG:chapter03_002}
+      Table 3-1    -> {TAB:chapter03_001}
+
+    Notes
+    -----
+    - The chapter/section number in the visible source text is ignored for the
+      internal ID. We trust the current normalized document_id and use the
+      trailing local item number as the internal sequence number.
+    - This is still a heuristic pass and may need refinement later.
     """
     def repl_ref(match: re.Match[str]) -> str:
         num = match.group(1)
@@ -320,7 +330,20 @@ def paragraph_text_with_markers(
         local_ref_map[num] = key
         return "{" + key + "}"
 
-    return _REF_NUM_PATTERN.sub(repl_ref, text)
+    def repl_fig(match: re.Match[str]) -> str:
+        local_num = int(match.group(2))
+        key = f"FIG:{document_id}_{local_num:03d}"
+        return "{" + key + "}"
+
+    def repl_tab(match: re.Match[str]) -> str:
+        local_num = int(match.group(2))
+        key = f"TAB:{document_id}_{local_num:03d}"
+        return "{" + key + "}"
+
+    text = _REF_NUM_PATTERN.sub(repl_ref, text)
+    text = _FIG_NUM_PATTERN.sub(repl_fig, text)
+    text = _TAB_NUM_PATTERN.sub(repl_tab, text)
+    return text
 
 
 # ---------------------------------------------------------------------------
