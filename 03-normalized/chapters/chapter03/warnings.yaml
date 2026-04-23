@@ -1,8 +1,4 @@
 warnings:
-- Table TAB:chapter03_002 extracted in body order but without automatic caption detection; caption must
-  be reviewed manually.
-- Table TAB:chapter03_007 extracted in body order but without automatic caption detection; caption must
-  be reviewed manually.
 - Figure FIG:chapter03_001 extracted without automatic position/caption detection; review manually.
 - Figure FIG:chapter03_002 extracted without automatic position/caption detection; review manually.
 - Figure FIG:chapter03_003 extracted without automatic position/caption detection; review manually.

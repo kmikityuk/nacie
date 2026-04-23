@@ -637,11 +637,11 @@ def extract_blocks(
                     local_ref_map=local_ref_map,
                     document_id=info.document_id,
                 )
-                if candidate.startswith("{TAB_REF:"):
-                    caption_text = candidate + " "
-                    caption = "{TAB_CAP:" + table_id + "} " + caption_text
-                elif candidate.startswith("{TAB_CAP:"):
-                    caption = candidate
+            if candidate.startswith("{TAB_REF:"):
+                caption_text = re.sub(r"^\{TAB_REF:[^}]+\}\s*", "", candidate).strip()
+                caption = "{TAB_CAP:" + table_id + "} " + caption_text
+            elif candidate.startswith("{TAB_CAP:"):
+                caption = candidate
 
             blocks.append(
                 {

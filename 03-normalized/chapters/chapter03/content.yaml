@@ -48,7 +48,7 @@ blocks:
   style: Caption
 - type: table
   id: TAB:chapter03_001
-  caption: '{TAB_CAP:chapter03_001} {TAB_REF:chapter03_001} Thermal conductivity (k) of the thermal insulator '
+  caption: '{TAB_CAP:chapter03_001} Thermal conductivity (k) of the thermal insulator'
   file: tables/chapter03_table_001.yaml
 - type: paragraph
   text: '{FIG_REF:chapter03_001}: Schematic representation of the NACIE-UP primary loop.'
@@ -103,7 +103,7 @@ blocks:
   style: Normal
 - type: table
   id: TAB:chapter03_002
-  caption: ''
+  caption: '{TAB_CAP:chapter03_002} Thermal conductivity (k) of the thermal insulator'
   file: tables/chapter03_table_002.yaml
 - type: paragraph
   text: Under steady-state conditions, Eq. (1) yields an accurate evaluation of the mass flow rate. During
@@ -178,7 +178,7 @@ blocks:
   style: Caption
 - type: table
   id: TAB:chapter03_003
-  caption: '{TAB_CAP:chapter03_003} {TAB_REF:chapter03_002}: FPS design parameters '
+  caption: '{TAB_CAP:chapter03_003} : FPS design parameters'
   file: tables/chapter03_table_003.yaml
 - type: paragraph
   text: '{FIG_REF:chapter03_004}: cross-section of the electrical wire-spaced FPS.'
@@ -231,8 +231,8 @@ blocks:
   style: Caption
 - type: table
   id: TAB:chapter03_004
-  caption: '{TAB_CAP:chapter03_004} {TAB_REF:chapter03_003}:Azimuthal angles of the pin generatrices where
-    the wall embedded Thermocouples are located. '
+  caption: '{TAB_CAP:chapter03_004} :Azimuthal angles of the pin generatrices where the wall embedded
+    Thermocouples are located.'
   file: tables/chapter03_table_004.yaml
 - type: paragraph
   text: '{TAB_REF:chapter03_004}: Azimuthal angles of the generatrices where the bulk Thermocouples are
@@ -240,16 +240,15 @@ blocks:
   style: Caption
 - type: table
   id: TAB:chapter03_005
-  caption: '{TAB_CAP:chapter03_005} {TAB_REF:chapter03_004}: Azimuthal angles of the generatrices where
-    the bulk Thermocouples are located for each sub-channel instrumented. '
+  caption: '{TAB_CAP:chapter03_005} : Azimuthal angles of the generatrices where the bulk Thermocouples
+    are located for each sub-channel instrumented.'
   file: tables/chapter03_table_005.yaml
 - type: paragraph
   text: '{TAB_REF:chapter03_005}: Thermocouples names with all the relevant information associated.'
   style: Caption
 - type: table
   id: TAB:chapter03_006
-  caption: '{TAB_CAP:chapter03_006} {TAB_REF:chapter03_005}: Thermocouples names with all the relevant
-    information associated. '
+  caption: '{TAB_CAP:chapter03_006} : Thermocouples names with all the relevant information associated.'
   file: tables/chapter03_table_006.yaml
 - type: heading
   level: 2
@@ -325,7 +324,7 @@ blocks:
   style: Normal
 - type: table
   id: TAB:chapter03_007
-  caption: ''
+  caption: '{TAB_CAP:chapter03_007} : Thermocouples names with all the relevant information associated.'
   file: tables/chapter03_table_007.yaml
 - type: paragraph
   text: where T is in °C and k in W/(m*K).

@@ -10,6 +10,7 @@ from docx import Document
 from docx.document import Document as _Document
 from docx.enum.text import WD_BREAK
 from docx.oxml import OxmlElement
+from docx.shared import Inches
 from docx.text.paragraph import Paragraph
 from docx.table import Table
 
@@ -65,6 +66,39 @@ def insert_paragraph_after(
     return new_para
 
 
+def insert_table_after(paragraph: Paragraph, rows: list[list[str]]) -> tuple[Table, Paragraph]:
+    """
+    Insert a Word table directly after an existing paragraph.
+
+    Returns
+    -------
+    tuple[Table, Paragraph]
+        The inserted table and a trailing paragraph inserted after the table,
+        which can be used as the next insertion anchor.
+    """
+    if not rows:
+        rows = [[""]]
+
+    n_rows = len(rows)
+    n_cols = max((len(r) for r in rows), default=1)
+
+    table = paragraph._parent.add_table(rows=n_rows, cols=n_cols, width=Inches(6.0))
+    tbl_element = table._tbl
+
+    for r_idx, row in enumerate(rows):
+        for c_idx in range(n_cols):
+            value = row[c_idx] if c_idx < len(row) else ""
+            table.cell(r_idx, c_idx).text = value
+
+    paragraph._p.addnext(tbl_element)
+
+    trailing_p = OxmlElement("w:p")
+    tbl_element.addnext(trailing_p)
+    trailing_para = Paragraph(trailing_p, paragraph._parent)
+
+    return table, trailing_para
+
+
 # ---------------------------------------------------------------------------
 # Style helpers
 # ---------------------------------------------------------------------------
@@ -94,6 +128,17 @@ def load_yaml(path: Path) -> dict:
     """
     with path.open("r", encoding="utf-8") as handle:
         return yaml.safe_load(handle)
+
+
+def load_table_rows(table_yaml_path: Path) -> list[list[str]]:
+    """
+    Load extracted table rows from a YAML file.
+    """
+    payload = load_yaml(table_yaml_path)
+    rows = payload.get("rows", [])
+    if not isinstance(rows, list):
+        return []
+    return rows
 
 
 # ---------------------------------------------------------------------------
@@ -171,7 +216,7 @@ def insert_paragraph_block(
     """
     Insert one paragraph block after the anchor.
 
-    Inline fields like {REF:...}, {FIG:...}, {TAB:...} are preserved exactly.
+    Inline fields like {REF:...}, {FIG_REF:...}, {TAB_REF:...} are preserved exactly.
     """
     return insert_paragraph_after(anchor, text=text, style_name=style_name)
 
@@ -210,9 +255,6 @@ def append_references_to_master(
     Append real reference texts to the global REFERENCES chapter in the form:
 
       {REF:chapter03_local_001} Reference text...
-
-    Keep a page break after the inserted references block so the next major
-    section still starts on a new page.
     """
     if not references:
         return
@@ -229,10 +271,77 @@ def append_references_to_master(
         line = "{" + ref_id + "} " + raw_text
         anchor = insert_paragraph_after(anchor, text=line, style_name=normal_style)
 
-    # Preserve separation from the next major section.
     page_break_para = insert_paragraph_after(anchor, style_name=normal_style)
     run = page_break_para.add_run()
     run.add_break(WD_BREAK.PAGE)
+
+
+# ---------------------------------------------------------------------------
+# Table insertion
+# ---------------------------------------------------------------------------
+
+def build_table_ref_marker(table_block: dict) -> str:
+    """
+    Convert a table block id like 'TAB:chapter03_001' to a running-text marker
+    '{TAB_REF:chapter03_001}'.
+    """
+    table_id = table_block.get("id", "TAB:unknown")
+    suffix = table_id.split("TAB:", 1)[1] if table_id.startswith("TAB:") else table_id
+    return "{TAB_REF:" + suffix + "}"
+
+
+def insert_table_near_first_reference(
+    doc: Document,
+    anchor_after_body: Paragraph,
+    table_block: dict,
+    assets_doc_dir: Path,
+    normal_style: str,
+    table_style_name: Optional[str],
+) -> Paragraph:
+    """
+    Insert a real table after the first paragraph containing its TAB_REF marker.
+
+    If no paragraph contains the marker, insert it after the provided fallback
+    anchor.
+    """
+    table_id = table_block.get("id", "TAB:unknown")
+    caption = (table_block.get("caption") or "").strip()
+    table_file_rel = table_block.get("file", "")
+
+    table_yaml_path = assets_doc_dir / table_file_rel
+    rows = load_table_rows(table_yaml_path) if table_yaml_path.exists() else [["[Missing table asset]"]]
+
+    ref_marker = build_table_ref_marker(table_block)
+
+    target_para: Optional[Paragraph] = None
+    for paragraph in doc.paragraphs:
+        if ref_marker in (paragraph.text or ""):
+            target_para = paragraph
+            break
+
+    if target_para is None:
+        target_para = anchor_after_body
+
+    # Caption above the table. Keep TAB_CAP field unchanged.
+    if caption:
+        caption_para = insert_paragraph_after(target_para, text=caption, style_name=normal_style)
+    else:
+        suffix = table_id.split("TAB:", 1)[1] if table_id.startswith("TAB:") else table_id
+        caption_para = insert_paragraph_after(
+            target_para,
+            text="{TAB_CAP:" + suffix + "} ",
+            style_name=normal_style,
+        )
+
+    table_obj, trailing_para = insert_table_after(caption_para, rows)
+
+    if table_style_name:
+        try:
+            table_obj.style = table_style_name
+        except Exception:
+            pass
+
+    return trailing_para
 
 
 # ---------------------------------------------------------------------------
@@ -242,15 +351,17 @@ def append_references_to_master(
 def assemble_one_document(
     skeleton_path: Path,
     content_yaml_path: Path,
+    assets_doc_dir: Path,
     output_path: Path,
 ) -> None:
     """
     Insert one normalized document into the skeleton and save the result.
 
-    Temporary verification behaviour:
-    - insert headings and paragraphs only
+    Current behaviour:
+    - insert headings and paragraphs
     - preserve all inline fields exactly
-    - do NOT insert standalone figure/table markers
+    - insert real tables after the first paragraph containing their TAB_REF marker
+    - do NOT insert figures yet
     - do NOT insert a local References subsection inside the chapter
     - append bibliography entries to the global REFERENCES chapter
     """
@@ -280,17 +391,21 @@ def assemble_one_document(
     h2_style = find_first_existing_style(doc, ["H2", "Heading 2", "HEADING2"], fallback=h1_style)
     h3_style = find_first_existing_style(doc, ["H3", "Heading 3", "HEADING3"], fallback=h2_style)
     normal_style = find_first_existing_style(doc, ["Normal", "normal"])
+    table_style_name = find_first_existing_style(doc, ["Table Grid", "TableGrid", "Normal Table"], fallback="")
+    if table_style_name == "":
+        table_style_name = None
 
     # Insert main body content under the chapter heading.
     heading_para = find_heading_paragraph(doc, title)
     anchor = remove_placeholder_paragraphs_after_heading(heading_para)
+
+    deferred_tables: list[dict] = []
 
     for block in blocks:
         block_type = block.get("type")
 
         if block_type == "heading":
             text = block.get("text", "")
-            # Do not insert a local "References" heading inside the chapter.
             if is_references_heading(text):
                 continue
 
@@ -312,12 +427,12 @@ def assemble_one_document(
             )
             continue
 
-        if block_type == "figure":
-            # Ignore standalone figure blocks for now.
+        if block_type == "table":
+            deferred_tables.append(block)
             continue
 
-        if block_type == "table":
-            # Ignore standalone table blocks for now.
+        if block_type == "figure":
+            # Ignore figures for now.
             continue
 
         anchor = insert_paragraph_block(
@@ -326,12 +441,23 @@ def assemble_one_document(
             style_name=normal_style,
         )
 
+    # Insert real tables near first TAB_REF mention.
+    table_anchor = anchor
+    for table_block in deferred_tables:
+        table_anchor = insert_table_near_first_reference(
+            doc=doc,
+            anchor_after_body=table_anchor,
+            table_block=table_block,
+            assets_doc_dir=assets_doc_dir,
+            normal_style=normal_style,
+            table_style_name=table_style_name,
+        )
+
     # Preserve separation from the next chapter after inserted body content.
-    page_break_para = insert_paragraph_after(anchor, style_name=normal_style)
+    page_break_para = insert_paragraph_after(table_anchor, style_name=normal_style)
     run = page_break_para.add_run()
     run.add_break(WD_BREAK.PAGE)
 
-    # Append the real bibliography texts to the global REFERENCES chapter.
     append_references_to_master(
         doc=doc,
         references=references,
@@ -380,9 +506,16 @@ def main() -> int:
     skeleton_path = Path(args.skeleton).resolve()
     output_path = Path(args.output).resolve()
 
+    document_dir = content_yaml_path.parent
+    section_dir = document_dir.parent
+    section_name = section_dir.name
+    document_id = document_dir.name
+    assets_doc_dir = ROOT / "04-assets" / section_name / document_id
+
     assemble_one_document(
         skeleton_path=skeleton_path,
         content_yaml_path=content_yaml_path,
+        assets_doc_dir=assets_doc_dir,
         output_path=output_path,
     )
 
