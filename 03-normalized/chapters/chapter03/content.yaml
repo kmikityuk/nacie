@@ -98,10 +98,10 @@ blocks:
     power), a static mixer, 2 Resistance Temperature Detector (RTD) and an internal RTD in the bulb. The
     mass flow rate will be computed by the thermal balance:'
   style: Normal
-- type: table
-  object_id: chapter03_table_u002
-  caption_text: ''
-  file: tables/chapter03_table_002.yaml
+- type: equation
+  object_id: chapter03_eq_001
+  equation_no: (1)
+  source_table_file: tables/chapter03_table_002.yaml
 - type: paragraph
   text: Under steady-state conditions, Eq. (1) yields an accurate evaluation of the mass flow rate. During
     transient operation, the bulb heater is actively regulated to maintain a constant temperature difference
@@ -304,10 +304,10 @@ blocks:
     expression for the powder thermal conductivity to be derived, which is strongly recommended for adoption
     in the present benchmark:'
   style: Normal
-- type: table
-  object_id: chapter03_table_u007
-  caption_text: ''
-  file: tables/chapter03_table_007.yaml
+- type: equation
+  object_id: chapter03_eq_002
+  equation_no: (2)
+  source_table_file: tables/chapter03_table_007.yaml
 - type: paragraph
   text: where T is in °C and k in W/(m*K).
   style: Normal

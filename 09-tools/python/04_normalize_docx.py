@@ -458,32 +458,23 @@ def table_nonempty_cells(rows: list[list[str]]) -> list[str]:
 
 def looks_like_equation_layout_table(rows: list[list[str]]) -> bool:
     """
-    Heuristic: detect Word tables used only to layout an equation and its number.
+    Heuristic: detect Word tables used only to layout an equation number.
+
+    In some DOCX files, python-docx extracts only the equation number cell,
+    while the equation body itself is not exposed as normal table text.
     """
     nonempty = table_nonempty_cells(rows)
 
     if not nonempty:
         return False
 
+    # Strong Chapter 3 case: only one visible non-empty cell and it is '(n)'.
+    if len(nonempty) == 1 and is_equation_number_text(nonempty[0]):
+        return True
+
+    # Slightly broader fallback for sparse equation layout tables.
     has_equation_number = any(is_equation_number_text(x) for x in nonempty)
-
-    mathish_count = 0
-    for x in nonempty:
-        if any(ch in x for ch in ("=", "÷", "∑", "∫", "√", "^", "/", "+", "−", "-")):
-            mathish_count += 1
-            continue
-        if re.search(r"[A-Za-z]\s*_[A-Za-z0-9]", x):
-            mathish_count += 1
-            continue
-        if re.search(r"[A-Za-z]+\s*\(", x):
-            mathish_count += 1
-            continue
-        if re.search(r"\b(T|Q|m|c|in|out)\b", x):
-            mathish_count += 1
-            continue
-
-    # Typical Word equation-layout tables are sparse and contain an equation number.
-    if has_equation_number and len(nonempty) <= 6 and mathish_count >= 1:
+    if has_equation_number and len(nonempty) <= 3:
         return True
 
     return False
@@ -625,6 +616,7 @@ def extract_table_number_from_caption(
 
     return None
 
+
 # ---------------------------------------------------------------------------
 # Block extraction
 # ---------------------------------------------------------------------------
@@ -646,6 +638,7 @@ def extract_blocks(
     - paragraphs immediately preceding a table that look like table captions are
       consumed as caption metadata and are NOT emitted as normal paragraph blocks
     - equation-layout Word tables are emitted as equation blocks, not tables
+    - raw table YAML is still preserved for equation-like objects
     - tables are emitted where they appear in the document body
     - figures are still appended later because image-position mapping is not yet
       implemented
@@ -659,6 +652,7 @@ def extract_blocks(
     local_ref_map: dict[str, str] = {}
     in_references_section = False
     table_index = 0
+    equation_index = 0
     pending_table_caption_text = ""
     pending_table_number: Optional[int] = None
     last_table_index_in_blocks: Optional[int] = None
@@ -789,7 +783,16 @@ def extract_blocks(
             table_index += 1
             rows = extract_table_rows(item)
 
+            table_meta = write_table_yaml(
+                rows=rows,
+                tables_dir=tables_dir,
+                document_id=info.document_id,
+                table_index=table_index,
+            )
+
             if looks_like_equation_layout_table(rows):
+                equation_index += 1
+
                 equation_number = ""
                 for value in table_nonempty_cells(rows):
                     if is_equation_number_text(value):
@@ -799,7 +802,9 @@ def extract_blocks(
                 blocks.append(
                     {
                         "type": "equation",
+                        "object_id": f"{info.document_id}_eq_{equation_index:03d}",
                         "equation_no": equation_number,
+                        "source_table_file": table_meta["file"],
                     }
                 )
 
@@ -807,13 +812,6 @@ def extract_blocks(
                 pending_table_number = None
                 last_table_index_in_blocks = None
                 continue
-
-            table_meta = write_table_yaml(
-                rows=rows,
-                tables_dir=tables_dir,
-                document_id=info.document_id,
-                table_index=table_index,
-            )
 
             caption_text = pending_table_caption_text.strip()
 

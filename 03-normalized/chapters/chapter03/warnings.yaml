@@ -1,8 +1,4 @@
 warnings:
-- Table object chapter03_table_u002 extracted in body order but without automatic caption detection; caption
-  must be reviewed manually.
-- Table object chapter03_table_u007 extracted in body order but without automatic caption detection; caption
-  must be reviewed manually.
 - Figure object chapter03_001 extracted without automatic position/caption detection; review manually.
 - Figure object chapter03_002 extracted without automatic position/caption detection; review manually.
 - Figure object chapter03_003 extracted without automatic position/caption detection; review manually.

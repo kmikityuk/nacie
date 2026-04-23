@@ -487,8 +487,16 @@ def assemble_one_document(
             continue
 
         if block_type == "equation":
-            # Equation extraction/assembly is not implemented yet.
-            # Keep document flow stable by skipping for now.
+            equation_no = (block.get("equation_no") or "").strip()
+            placeholder = "[Equation"
+            if equation_no:
+                placeholder += f" {equation_no}"
+            placeholder += " omitted]"
+            anchor = insert_paragraph_block(
+                anchor=anchor,
+                text=placeholder,
+                style_name=normal_style,
+            )
             continue
 
         if block_type == "figure":
