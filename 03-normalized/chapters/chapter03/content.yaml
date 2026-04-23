@@ -43,12 +43,9 @@ blocks:
     resin. The thermal conductivity of the resin is temperature dependent, as reported in {TAB_REF:chapter03_001}
     (manufacturer-provided data). The insulation thickness is 100 mm along the entire loop.
   style: Normal
-- type: paragraph
-  text: '{TAB_REF:chapter03_001} Thermal conductivity (k) of the thermal insulator'
-  style: Caption
 - type: table
-  id: TAB:chapter03_001
-  caption: '{TAB_CAP:chapter03_001} Thermal conductivity (k) of the thermal insulator'
+  object_id: chapter03_001
+  caption_text: Thermal conductivity (k) of the thermal insulator
   file: tables/chapter03_table_001.yaml
 - type: paragraph
   text: '{FIG_REF:chapter03_001}: Schematic representation of the NACIE-UP primary loop.'
@@ -102,8 +99,8 @@ blocks:
     mass flow rate will be computed by the thermal balance:'
   style: Normal
 - type: table
-  id: TAB:chapter03_002
-  caption: '{TAB_CAP:chapter03_002} Thermal conductivity (k) of the thermal insulator'
+  object_id: chapter03_table_u002
+  caption_text: ''
   file: tables/chapter03_table_002.yaml
 - type: paragraph
   text: Under steady-state conditions, Eq. (1) yields an accurate evaluation of the mass flow rate. During
@@ -173,12 +170,9 @@ blocks:
     for the correct installation of the electrical connectors. A drawing of the bottom grid, which is
     the only component required for numerical fluid-dynamics modeling, is provided separately to the participants.
   style: Normal
-- type: paragraph
-  text: '{TAB_REF:chapter03_002}: FPS design parameters'
-  style: Caption
 - type: table
-  id: TAB:chapter03_003
-  caption: '{TAB_CAP:chapter03_003} : FPS design parameters'
+  object_id: chapter03_002
+  caption_text: FPS design parameters
   file: tables/chapter03_table_003.yaml
 - type: paragraph
   text: '{FIG_REF:chapter03_004}: cross-section of the electrical wire-spaced FPS.'
@@ -225,30 +219,18 @@ blocks:
   text: '{FIG_REF:chapter03_006}: Axial (a) and section (b) locations of wall embedded and bulk TCs for
     pins n. 1,3, 2, 4, 5, 6, 7, 9, 16, 18, 19.'
   style: Caption
-- type: paragraph
-  text: '{TAB_REF:chapter03_003}:Azimuthal angles of the pin generatrices where the wall embedded Thermocouples
-    are located.'
-  style: Caption
 - type: table
-  id: TAB:chapter03_004
-  caption: '{TAB_CAP:chapter03_004} :Azimuthal angles of the pin generatrices where the wall embedded
-    Thermocouples are located.'
+  object_id: chapter03_003
+  caption_text: Azimuthal angles of the pin generatrices where the wall embedded Thermocouples are located.
   file: tables/chapter03_table_004.yaml
-- type: paragraph
-  text: '{TAB_REF:chapter03_004}: Azimuthal angles of the generatrices where the bulk Thermocouples are
-    located for each sub-channel instrumented.'
-  style: Caption
 - type: table
-  id: TAB:chapter03_005
-  caption: '{TAB_CAP:chapter03_005} : Azimuthal angles of the generatrices where the bulk Thermocouples
-    are located for each sub-channel instrumented.'
+  object_id: chapter03_004
+  caption_text: Azimuthal angles of the generatrices where the bulk Thermocouples are located for each
+    sub-channel instrumented.
   file: tables/chapter03_table_005.yaml
-- type: paragraph
-  text: '{TAB_REF:chapter03_005}: Thermocouples names with all the relevant information associated.'
-  style: Caption
 - type: table
-  id: TAB:chapter03_006
-  caption: '{TAB_CAP:chapter03_006} : Thermocouples names with all the relevant information associated.'
+  object_id: chapter03_005
+  caption_text: Thermocouples names with all the relevant information associated.
   file: tables/chapter03_table_006.yaml
 - type: heading
   level: 2
@@ -323,8 +305,8 @@ blocks:
     in the present benchmark:'
   style: Normal
 - type: table
-  id: TAB:chapter03_007
-  caption: '{TAB_CAP:chapter03_007} : Thermocouples names with all the relevant information associated.'
+  object_id: chapter03_table_u007
+  caption_text: ''
   file: tables/chapter03_table_007.yaml
 - type: paragraph
   text: where T is in °C and k in W/(m*K).
@@ -425,77 +407,77 @@ blocks:
   text: References
   style: Heading 2
 - type: figure
-  id: FIG:chapter03_001
+  object_id: chapter03_001
   image: images/chapter03_fig_001.jpeg
-  caption: '{FIG_CAP:chapter03_001} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_002
+  object_id: chapter03_002
   image: images/chapter03_fig_002.png
-  caption: '{FIG_CAP:chapter03_002} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_003
+  object_id: chapter03_003
   image: images/chapter03_fig_003.png
-  caption: '{FIG_CAP:chapter03_003} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_004
+  object_id: chapter03_004
   image: images/chapter03_fig_004.png
-  caption: '{FIG_CAP:chapter03_004} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_005
+  object_id: chapter03_005
   image: images/chapter03_fig_005.emf
-  caption: '{FIG_CAP:chapter03_005} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_006
+  object_id: chapter03_006
   image: images/chapter03_fig_006.jpg
-  caption: '{FIG_CAP:chapter03_006} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_007
+  object_id: chapter03_007
   image: images/chapter03_fig_007.jpg
-  caption: '{FIG_CAP:chapter03_007} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_008
+  object_id: chapter03_008
   image: images/chapter03_fig_008.jpg
-  caption: '{FIG_CAP:chapter03_008} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_009
+  object_id: chapter03_009
   image: images/chapter03_fig_009.jpg
-  caption: '{FIG_CAP:chapter03_009} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_010
+  object_id: chapter03_010
   image: images/chapter03_fig_010.emf
-  caption: '{FIG_CAP:chapter03_010} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_011
+  object_id: chapter03_011
   image: images/chapter03_fig_011.png
-  caption: '{FIG_CAP:chapter03_011} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_012
+  object_id: chapter03_012
   image: images/chapter03_fig_012.wmf
-  caption: '{FIG_CAP:chapter03_012} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_013
+  object_id: chapter03_013
   image: images/chapter03_fig_013.png
-  caption: '{FIG_CAP:chapter03_013} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_014
+  object_id: chapter03_014
   image: images/chapter03_fig_014.emf
-  caption: '{FIG_CAP:chapter03_014} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_015
+  object_id: chapter03_015
   image: images/chapter03_fig_015.png
-  caption: '{FIG_CAP:chapter03_015} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_016
+  object_id: chapter03_016
   image: images/chapter03_fig_016.emf
-  caption: '{FIG_CAP:chapter03_016} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_017
+  object_id: chapter03_017
   image: images/chapter03_fig_017.png
-  caption: '{FIG_CAP:chapter03_017} '
+  caption_text: ''
 - type: figure
-  id: FIG:chapter03_018
+  object_id: chapter03_018
   image: images/chapter03_fig_018.png
-  caption: '{FIG_CAP:chapter03_018} '
+  caption_text: ''
 references:
 - id: REF:chapter03_local_001
   raw_text: P. Cioli Puviani, I. Di Piazza, Estimation of the accuracy of the thermal flow meter, ENEA

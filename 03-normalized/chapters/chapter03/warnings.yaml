@@ -1,21 +1,25 @@
 warnings:
-- Figure FIG:chapter03_001 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_002 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_003 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_004 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_005 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_006 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_007 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_008 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_009 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_010 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_011 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_012 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_013 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_014 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_015 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_016 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_017 extracted without automatic position/caption detection; review manually.
-- Figure FIG:chapter03_018 extracted without automatic position/caption detection; review manually.
+- Table object chapter03_table_u002 extracted in body order but without automatic caption detection; caption
+  must be reviewed manually.
+- Table object chapter03_table_u007 extracted in body order but without automatic caption detection; caption
+  must be reviewed manually.
+- Figure object chapter03_001 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_002 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_003 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_004 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_005 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_006 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_007 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_008 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_009 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_010 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_011 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_012 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_013 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_014 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_015 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_016 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_017 extracted without automatic position/caption detection; review manually.
+- Figure object chapter03_018 extracted without automatic position/caption detection; review manually.
 - In-text figure references are converted to FIG_REF fields, but figure placement is not yet reconstructed
   from body order.

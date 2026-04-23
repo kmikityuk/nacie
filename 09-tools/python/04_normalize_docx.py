@@ -435,6 +435,60 @@ def write_table_yaml(
     }
 
 
+def is_equation_number_text(text: str) -> bool:
+    """
+    Return True for strings like '(1)', '(12)', '(A.1)'.
+    """
+    s = " ".join(text.strip().split())
+    return bool(re.fullmatch(r"\([A-Za-z0-9.]+\)", s))
+
+
+def table_nonempty_cells(rows: list[list[str]]) -> list[str]:
+    """
+    Flatten non-empty cell texts.
+    """
+    values: list[str] = []
+    for row in rows:
+        for cell in row:
+            text = " ".join(cell.strip().split())
+            if text:
+                values.append(text)
+    return values
+
+
+def looks_like_equation_layout_table(rows: list[list[str]]) -> bool:
+    """
+    Heuristic: detect Word tables used only to layout an equation and its number.
+    """
+    nonempty = table_nonempty_cells(rows)
+
+    if not nonempty:
+        return False
+
+    has_equation_number = any(is_equation_number_text(x) for x in nonempty)
+
+    mathish_count = 0
+    for x in nonempty:
+        if any(ch in x for ch in ("=", "÷", "∑", "∫", "√", "^", "/", "+", "−", "-")):
+            mathish_count += 1
+            continue
+        if re.search(r"[A-Za-z]\s*_[A-Za-z0-9]", x):
+            mathish_count += 1
+            continue
+        if re.search(r"[A-Za-z]+\s*\(", x):
+            mathish_count += 1
+            continue
+        if re.search(r"\b(T|Q|m|c|in|out)\b", x):
+            mathish_count += 1
+            continue
+
+    # Typical Word equation-layout tables are sparse and contain an equation number.
+    if has_equation_number and len(nonempty) <= 6 and mathish_count >= 1:
+        return True
+
+    return False
+
+
 # ---------------------------------------------------------------------------
 # Reference extraction
 # ---------------------------------------------------------------------------
@@ -505,24 +559,75 @@ def extract_reference_entries(doc: Document, document_id: str) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
-# Block extraction
+# Block extraction helpers
 # ---------------------------------------------------------------------------
 
-def table_preceding_caption_candidate(last_paragraph_text: str) -> bool:
+def is_table_caption_text(text: str) -> bool:
     """
-    Return True if the previous paragraph looks like a table caption.
+    Return True if paragraph text looks like a table caption.
     """
-    text = last_paragraph_text.strip()
-    if not text:
+    stripped = text.strip()
+    if not stripped:
         return False
 
-    lowered = text.lower()
-    return (
-        lowered.startswith("table ")
-        or lowered.startswith("{tab_ref:")
-        or lowered.startswith("{tab_cap:")
+    normalized = re.sub(r"\s+", " ", stripped).strip()
+    return bool(
+        re.match(r"^(table|TABLE)\s+\d+[.-:]?\s*", normalized)
+        or re.match(r"^\{TAB_REF:[^}]+\}", normalized)
     )
 
+
+def extract_caption_text_from_table_paragraph(
+    text: str,
+    local_ref_map: dict[str, str],
+    document_id: str,
+) -> str:
+    """
+    Normalize a table-caption paragraph and return only the human caption text.
+    """
+    normalized = paragraph_text_with_markers(
+        text=text,
+        local_ref_map=local_ref_map,
+        document_id=document_id,
+    )
+
+    normalized = re.sub(r"^\{TAB_REF:[^}]+\}\s*", "", normalized).strip()
+    normalized = re.sub(r"^(table|TABLE)\s+\d+[.-:]?\s*", "", normalized).strip()
+    normalized = re.sub(r"^[:.\-–]+\s*", "", normalized).strip()
+    return normalized
+
+
+def extract_table_number_from_caption(
+    text: str,
+    local_ref_map: dict[str, str],
+    document_id: str,
+) -> Optional[int]:
+    """
+    Return the local table number from a caption paragraph, if present.
+
+    Examples:
+      'Table 3-2: FPS design parameters' -> 2
+      '{TAB_REF:chapter03_002} FPS design parameters' -> 2
+    """
+    normalized = paragraph_text_with_markers(
+        text=text,
+        local_ref_map=local_ref_map,
+        document_id=document_id,
+    )
+
+    match = re.match(r"^\{TAB_REF:[^}]*_(\d{3})\}", normalized)
+    if match:
+        return int(match.group(1))
+
+    match = re.match(r"^(table|TABLE)\s+\d+[.-](\d+)", text.strip())
+    if match:
+        return int(match.group(2))
+
+    return None
+
+# ---------------------------------------------------------------------------
+# Block extraction
+# ---------------------------------------------------------------------------
 
 def extract_blocks(
     doc: Document,
@@ -534,19 +639,29 @@ def extract_blocks(
     """
     Extract a conservative ordered block list from the document.
 
-    Updated behaviour:
+    Current behaviour:
     - preserve body order for paragraphs and tables
     - paragraphs inside a References section are excluded from blocks and stored
       only in the references list
+    - paragraphs immediately preceding a table that look like table captions are
+      consumed as caption metadata and are NOT emitted as normal paragraph blocks
+    - equation-layout Word tables are emitted as equation blocks, not tables
     - tables are emitted where they appear in the document body
     - figures are still appended later because image-position mapping is not yet
       implemented
+
+    Important design rule:
+    - normalized YAML stores plain caption_text
+    - normalized YAML does NOT store TAB_CAP / FIG_CAP markers
+    - caption markers are rendered later by the assembler
     """
     blocks: list[dict] = []
     local_ref_map: dict[str, str] = {}
     in_references_section = False
     table_index = 0
-    last_nonempty_paragraph_text = ""
+    pending_table_caption_text = ""
+    pending_table_number: Optional[int] = None
+    last_table_index_in_blocks: Optional[int] = None
 
     for item in iter_block_items(doc):
         if isinstance(item, Paragraph):
@@ -568,7 +683,9 @@ def extract_blocks(
                         "style": style_name or None,
                     }
                 )
-                last_nonempty_paragraph_text = text
+                pending_table_caption_text = ""
+                pending_table_number = None
+                last_table_index_in_blocks = None
                 continue
 
             if heading_level is not None and in_references_section:
@@ -583,19 +700,22 @@ def extract_blocks(
                         "style": style_name or None,
                     }
                 )
-                last_nonempty_paragraph_text = text
+                pending_table_caption_text = ""
+                pending_table_number = None
+                last_table_index_in_blocks = None
                 continue
 
             match = re.match(r"^\[(\d+)\]\s*(.+)$", text)
             if match:
-                # Numbered bibliography entry: keep it out of body blocks.
-                last_nonempty_paragraph_text = text
+                pending_table_caption_text = ""
+                pending_table_number = None
+                last_table_index_in_blocks = None
                 continue
 
             if in_references_section:
-                # Plain bibliography entry under a References heading: keep it out
-                # of body blocks, it will go to references: only.
-                last_nonempty_paragraph_text = text
+                pending_table_caption_text = ""
+                pending_table_number = None
+                last_table_index_in_blocks = None
                 continue
 
             normalized_text = paragraph_text_with_markers(
@@ -603,6 +723,51 @@ def extract_blocks(
                 local_ref_map=local_ref_map,
                 document_id=info.document_id,
             )
+
+            # Caption immediately after a table: attach it to the last table block
+            # if that table still has no caption.
+            if (
+                last_table_index_in_blocks is not None
+                and blocks[last_table_index_in_blocks].get("type") == "table"
+                and not blocks[last_table_index_in_blocks].get("caption_text")
+                and style_name.strip().lower() == "caption"
+                and is_table_caption_text(normalized_text)
+            ):
+                blocks[last_table_index_in_blocks]["caption_text"] = (
+                    extract_caption_text_from_table_paragraph(
+                        text=text,
+                        local_ref_map=local_ref_map,
+                        document_id=info.document_id,
+                    )
+                )
+
+                caption_number = extract_table_number_from_caption(
+                    text=text,
+                    local_ref_map=local_ref_map,
+                    document_id=info.document_id,
+                )
+                if caption_number is not None:
+                    blocks[last_table_index_in_blocks]["object_id"] = (
+                        f"{info.document_id}_{caption_number:03d}"
+                    )
+                continue
+
+            # Caption immediately before a table: keep it pending and do not emit
+            # it as a normal paragraph block.
+            if style_name.strip().lower() == "caption" and is_table_caption_text(normalized_text):
+                pending_table_caption_text = extract_caption_text_from_table_paragraph(
+                    text=text,
+                    local_ref_map=local_ref_map,
+                    document_id=info.document_id,
+                )
+                pending_table_number = extract_table_number_from_caption(
+                    text=text,
+                    local_ref_map=local_ref_map,
+                    document_id=info.document_id,
+                )
+                last_table_index_in_blocks = None
+                continue
+
             blocks.append(
                 {
                     "type": "paragraph",
@@ -610,7 +775,9 @@ def extract_blocks(
                     "style": style_name or None,
                 }
             )
-            last_nonempty_paragraph_text = text
+            pending_table_caption_text = ""
+            pending_table_number = None
+            last_table_index_in_blocks = None
             continue
 
         if isinstance(item, Table):
@@ -621,6 +788,26 @@ def extract_blocks(
 
             table_index += 1
             rows = extract_table_rows(item)
+
+            if looks_like_equation_layout_table(rows):
+                equation_number = ""
+                for value in table_nonempty_cells(rows):
+                    if is_equation_number_text(value):
+                        equation_number = value
+                        break
+
+                blocks.append(
+                    {
+                        "type": "equation",
+                        "equation_no": equation_number,
+                    }
+                )
+
+                pending_table_caption_text = ""
+                pending_table_number = None
+                last_table_index_in_blocks = None
+                continue
+
             table_meta = write_table_yaml(
                 rows=rows,
                 tables_dir=tables_dir,
@@ -628,48 +815,46 @@ def extract_blocks(
                 table_index=table_index,
             )
 
-            table_id = f"{info.document_id}_{table_index:03d}"
+            caption_text = pending_table_caption_text.strip()
 
-            caption = ""
-            if table_preceding_caption_candidate(last_nonempty_paragraph_text):
-                candidate = paragraph_text_with_markers(
-                    text=last_nonempty_paragraph_text,
-                    local_ref_map=local_ref_map,
-                    document_id=info.document_id,
-                )
-            if candidate.startswith("{TAB_REF:"):
-                caption_text = re.sub(r"^\{TAB_REF:[^}]+\}\s*", "", candidate).strip()
-                caption = "{TAB_CAP:" + table_id + "} " + caption_text
-            elif candidate.startswith("{TAB_CAP:"):
-                caption = candidate
+            if pending_table_number is not None:
+                object_id = f"{info.document_id}_{pending_table_number:03d}"
+            else:
+                object_id = f"{info.document_id}_table_u{table_index:03d}"
+
+            pending_table_caption_text = ""
+            pending_table_number = None
 
             blocks.append(
                 {
                     "type": "table",
-                    "id": f"TAB:{table_id}",
-                    "caption": caption,
+                    "object_id": object_id,
+                    "caption_text": caption_text,
                     "file": table_meta["file"],
                 }
             )
 
-            if not caption:
+            last_table_index_in_blocks = len(blocks) - 1
+
+            if not caption_text:
                 warnings.append(
-                    f"Table TAB:{table_id} extracted in body order but without automatic caption detection; caption must be reviewed manually."
+                    f"Table object {object_id} extracted in body order but without automatic caption detection; caption must be reviewed manually."
                 )
 
-    # Keep figures as trailing blocks for now, but use FIG_CAP for caption role.
+    # Keep figures as trailing blocks for now.
+    # We keep plain caption_text only; the assembler will later render FIG_CAP.
     for index, image_meta in enumerate(image_records, start=1):
-        fig_id = f"{info.document_id}_{index:03d}"
+        object_id = f"{info.document_id}_{index:03d}"
         blocks.append(
             {
                 "type": "figure",
-                "id": f"FIG:{fig_id}",
+                "object_id": object_id,
                 "image": image_meta["relative_path"],
-                "caption": "{FIG_CAP:" + fig_id + "} ",
+                "caption_text": "",
             }
         )
         warnings.append(
-            f"Figure FIG:{fig_id} extracted without automatic position/caption detection; review manually."
+            f"Figure object {object_id} extracted without automatic position/caption detection; review manually."
         )
 
     if image_records:

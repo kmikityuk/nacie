@@ -99,6 +99,28 @@ def insert_table_after(paragraph: Paragraph, rows: list[list[str]]) -> tuple[Tab
     return table, trailing_para
 
 
+def set_paragraph_text(paragraph: Paragraph, text: str) -> None:
+    """
+    Replace all runs in a paragraph with plain text, preserving the paragraph style.
+    """
+    p = paragraph._p
+    for child in list(p):
+        if child.tag.endswith("}r"):
+            p.remove(child)
+
+    paragraph.add_run(text)
+
+
+def insert_page_break_after(paragraph: Paragraph, style_name: Optional[str] = None) -> Paragraph:
+    """
+    Insert a page-break paragraph directly after an existing paragraph.
+    """
+    page_para = insert_paragraph_after(paragraph, style_name=style_name)
+    run = page_para.add_run()
+    run.add_break(WD_BREAK.PAGE)
+    return page_para
+
+
 # ---------------------------------------------------------------------------
 # Style helpers
 # ---------------------------------------------------------------------------
@@ -277,63 +299,78 @@ def append_references_to_master(
 
 
 # ---------------------------------------------------------------------------
-# Table insertion
+# Table / equation insertion
 # ---------------------------------------------------------------------------
+
+def is_numbered_table_object_id(object_id: str) -> bool:
+    """
+    Return True for numbered table ids like 'chapter03_002' and False for
+    unnumbered helper objects like 'chapter03_table_u002'.
+    """
+    return "_table_u" not in object_id
+
 
 def build_table_ref_marker(table_block: dict) -> str:
     """
-    Convert a table block id like 'TAB:chapter03_001' to a running-text marker
-    '{TAB_REF:chapter03_001}'.
+    Convert a numbered table block object_id like 'chapter03_001' to a running-text
+    marker '{TAB_REF:chapter03_001}'.
     """
-    table_id = table_block.get("id", "TAB:unknown")
-    suffix = table_id.split("TAB:", 1)[1] if table_id.startswith("TAB:") else table_id
-    return "{TAB_REF:" + suffix + "}"
+    object_id = table_block.get("object_id", "unknown")
+    return "{TAB_REF:" + object_id + "}"
 
 
-def insert_table_near_first_reference(
-    doc: Document,
-    anchor_after_body: Paragraph,
+def build_table_cap_marker(table_block: dict) -> str:
+    """
+    Convert a numbered table block object_id like 'chapter03_001' to a caption marker
+    '{TAB_CAP:chapter03_001}'.
+    """
+    object_id = table_block.get("object_id", "unknown")
+    return "{TAB_CAP:" + object_id + "}"
+
+
+def insert_table_at_anchor(
+    anchor: Paragraph,
     table_block: dict,
     assets_doc_dir: Path,
     normal_style: str,
     table_style_name: Optional[str],
 ) -> Paragraph:
     """
-    Insert a real table after the first paragraph containing its TAB_REF marker.
+    Insert a real table exactly at the current assembly anchor.
 
-    If no paragraph contains the marker, insert it after the provided fallback
-    anchor.
+    Rules:
+    - numbered tables get a {TAB_CAP:...} caption line
+    - unnumbered table-like objects do not get a TAB_CAP field
+    - if an unnumbered object has caption_text, render plain text only
     """
-    table_id = table_block.get("id", "TAB:unknown")
-    caption = (table_block.get("caption") or "").strip()
+    object_id = table_block.get("object_id", "unknown")
+    caption_text = (table_block.get("caption_text") or "").strip()
     table_file_rel = table_block.get("file", "")
 
     table_yaml_path = assets_doc_dir / table_file_rel
     rows = load_table_rows(table_yaml_path) if table_yaml_path.exists() else [["[Missing table asset]"]]
 
-    ref_marker = build_table_ref_marker(table_block)
+    caption_anchor = anchor
 
-    target_para: Optional[Paragraph] = None
-    for paragraph in doc.paragraphs:
-        if ref_marker in (paragraph.text or ""):
-            target_para = paragraph
-            break
-
-    if target_para is None:
-        target_para = anchor_after_body
-
-    # Caption above the table. Keep TAB_CAP field unchanged.
-    if caption:
-        caption_para = insert_paragraph_after(target_para, text=caption, style_name=normal_style)
-    else:
-        suffix = table_id.split("TAB:", 1)[1] if table_id.startswith("TAB:") else table_id
-        caption_para = insert_paragraph_after(
-            target_para,
-            text="{TAB_CAP:" + suffix + "} ",
+    if is_numbered_table_object_id(object_id):
+        caption_line = build_table_cap_marker(table_block)
+        if caption_text:
+            caption_line += " " + caption_text
+        else:
+            caption_line += " "
+        caption_anchor = insert_paragraph_after(
+            anchor,
+            text=caption_line,
+            style_name=normal_style,
+        )
+    elif caption_text:
+        caption_anchor = insert_paragraph_after(
+            anchor,
+            text=caption_text,
             style_name=normal_style,
         )
 
-    table_obj, trailing_para = insert_table_after(caption_para, rows)
+    table_obj, trailing_para = insert_table_after(caption_anchor, rows)
 
     if table_style_name:
         try:
@@ -360,7 +397,9 @@ def assemble_one_document(
     Current behaviour:
     - insert headings and paragraphs
     - preserve all inline fields exactly
-    - insert real tables after the first paragraph containing their TAB_REF marker
+    - insert real tables inline in normalized order
+    - numbered tables get TAB_CAP fields
+    - unnumbered table-like objects do not get TAB_CAP fields
     - do NOT insert figures yet
     - do NOT insert a local References subsection inside the chapter
     - append bibliography entries to the global REFERENCES chapter
@@ -399,20 +438,30 @@ def assemble_one_document(
     heading_para = find_heading_paragraph(doc, title)
     anchor = remove_placeholder_paragraphs_after_heading(heading_para)
 
-    deferred_tables: list[dict] = []
-
     for block in blocks:
         block_type = block.get("type")
 
         if block_type == "heading":
             text = block.get("text", "")
+            level = int(block.get("level", 1))
+
             if is_references_heading(text):
+                continue
+
+            # Skip generic source heading like "CHAPTER 3".
+            if normalize_heading_text(text) == normalize_heading_text(title):
+                continue
+
+            # Replace the existing skeleton chapter heading text with the first
+            # real level-1 heading from the source document.
+            if level == 1:
+                set_paragraph_text(heading_para, text)
                 continue
 
             anchor = insert_heading_block(
                 anchor=anchor,
                 text=text,
-                level=int(block.get("level", 1)),
+                level=level,
                 h1_style=h1_style,
                 h2_style=h2_style,
                 h3_style=h3_style,
@@ -428,7 +477,18 @@ def assemble_one_document(
             continue
 
         if block_type == "table":
-            deferred_tables.append(block)
+            anchor = insert_table_at_anchor(
+                anchor=anchor,
+                table_block=block,
+                assets_doc_dir=assets_doc_dir,
+                normal_style=normal_style,
+                table_style_name=table_style_name,
+            )
+            continue
+
+        if block_type == "equation":
+            # Equation extraction/assembly is not implemented yet.
+            # Keep document flow stable by skipping for now.
             continue
 
         if block_type == "figure":
@@ -441,22 +501,7 @@ def assemble_one_document(
             style_name=normal_style,
         )
 
-    # Insert real tables near first TAB_REF mention.
-    table_anchor = anchor
-    for table_block in deferred_tables:
-        table_anchor = insert_table_near_first_reference(
-            doc=doc,
-            anchor_after_body=table_anchor,
-            table_block=table_block,
-            assets_doc_dir=assets_doc_dir,
-            normal_style=normal_style,
-            table_style_name=table_style_name,
-        )
-
-    # Preserve separation from the next chapter after inserted body content.
-    page_break_para = insert_paragraph_after(table_anchor, style_name=normal_style)
-    run = page_break_para.add_run()
-    run.add_break(WD_BREAK.PAGE)
+    insert_page_break_after(anchor, style_name=normal_style)
 
     append_references_to_master(
         doc=doc,
@@ -481,7 +526,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "content_yaml",
-        help="Path to content.yaml produced by nacie_tecdoc_normalize_docx.py",
+        help="Path to content.yaml produced by normalize_docx.py",
     )
     parser.add_argument(
         "--skeleton",
