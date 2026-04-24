@@ -310,15 +310,6 @@ def is_numbered_table_object_id(object_id: str) -> bool:
     return "_table_u" not in object_id
 
 
-def build_table_ref_marker(table_block: dict) -> str:
-    """
-    Convert a numbered table block object_id like 'chapter03_001' to a running-text
-    marker '{TAB_REF:chapter03_001}'.
-    """
-    object_id = table_block.get("object_id", "unknown")
-    return "{TAB_REF:" + object_id + "}"
-
-
 def build_table_cap_marker(table_block: dict) -> str:
     """
     Convert a numbered table block object_id like 'chapter03_001' to a caption marker
@@ -381,6 +372,28 @@ def insert_table_at_anchor(
     return trailing_para
 
 
+def insert_equation_placeholder_at_anchor(
+    anchor: Paragraph,
+    equation_block: dict,
+    normal_style: str,
+) -> Paragraph:
+    """
+    Insert a visible placeholder for an equation block.
+
+    Step 3 behaviour:
+    - keep equation position in the document
+    - preserve equation numbering if available
+    """
+    equation_no = (equation_block.get("equation_no") or "").strip()
+
+    placeholder = "[Equation"
+    if equation_no:
+        placeholder += f" {equation_no}"
+    placeholder += " omitted]"
+
+    return insert_paragraph_after(anchor, text=placeholder, style_name=normal_style)
+
+
 # ---------------------------------------------------------------------------
 # Assembly logic
 # ---------------------------------------------------------------------------
@@ -400,6 +413,7 @@ def assemble_one_document(
     - insert real tables inline in normalized order
     - numbered tables get TAB_CAP fields
     - unnumbered table-like objects do not get TAB_CAP fields
+    - equations are inserted as visible numbered placeholders
     - do NOT insert figures yet
     - do NOT insert a local References subsection inside the chapter
     - append bibliography entries to the global REFERENCES chapter
@@ -487,15 +501,10 @@ def assemble_one_document(
             continue
 
         if block_type == "equation":
-            equation_no = (block.get("equation_no") or "").strip()
-            placeholder = "[Equation"
-            if equation_no:
-                placeholder += f" {equation_no}"
-            placeholder += " omitted]"
-            anchor = insert_paragraph_block(
+            anchor = insert_equation_placeholder_at_anchor(
                 anchor=anchor,
-                text=placeholder,
-                style_name=normal_style,
+                equation_block=block,
+                normal_style=normal_style,
             )
             continue
 
