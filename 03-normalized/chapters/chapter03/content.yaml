@@ -99,16 +99,18 @@ blocks:
     mass flow rate will be computed by the thermal balance:'
   style: Normal
 - type: equation
-  object_id: chapter03_eq_001
-  equation_no: (1)
+  object_id: chapter03_001
+  equation_no: 1
+  equation_label: (1)
   source_table_file: tables/chapter03_table_002.yaml
+  image: equations/chapter03_eq_001.png
 - type: paragraph
-  text: Under steady-state conditions, Eq. (1) yields an accurate evaluation of the mass flow rate. During
-    transient operation, the bulb heater is actively regulated to maintain a constant temperature difference
-    between the heater and the inlet RTD. In addition, an inlet–outlet temperature compensation is implemented
-    to account for the fluid transit time through the 800 mm pipe. These two features, implemented within
-    the Data Acquisition and Control System (DACS) of the instrument, ensure a fast and accurate response
-    under transient conditions.
+  text: Under steady-state conditions, {EQ_REF:chapter03_001} yields an accurate evaluation of the mass
+    flow rate. During transient operation, the bulb heater is actively regulated to maintain a constant
+    temperature difference between the heater and the inlet RTD. In addition, an inlet–outlet temperature
+    compensation is implemented to account for the fluid transit time through the 800 mm pipe. These two
+    features, implemented within the Data Acquisition and Control System (DACS) of the instrument, ensure
+    a fast and accurate response under transient conditions.
   style: Normal
 - type: paragraph
   text: The thermal flow meter was developed at ENEA in collaboration with Thermocoax and was successfully
@@ -305,9 +307,11 @@ blocks:
     in the present benchmark:'
   style: Normal
 - type: equation
-  object_id: chapter03_eq_002
-  equation_no: (2)
+  object_id: chapter03_002
+  equation_no: 2
+  equation_label: (2)
   source_table_file: tables/chapter03_table_007.yaml
+  image: equations/chapter03_eq_002.png
 - type: paragraph
   text: where T is in °C and k in W/(m*K).
   style: Normal

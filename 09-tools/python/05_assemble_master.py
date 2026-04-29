@@ -319,6 +319,29 @@ def build_table_cap_marker(table_block: dict) -> str:
     return "{TAB_CAP:" + object_id + "}"
 
 
+def remove_table_borders(table: Table) -> None:
+    """
+    Remove visible borders from a Word table.
+    """
+    tbl = table._tbl
+    tbl_pr = tbl.tblPr
+
+    borders = tbl_pr.first_child_found_in("w:tblBorders")
+    if borders is None:
+        borders = OxmlElement("w:tblBorders")
+        tbl_pr.append(borders)
+
+    for tag_name in ("w:top", "w:left", "w:bottom", "w:right", "w:insideH", "w:insideV"):
+        border = borders.find(f"./{tag_name}", borders.nsmap)
+        if border is None:
+            border = OxmlElement(tag_name)
+            borders.append(border)
+        border.set(
+            "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val",
+            "nil",
+        )
+
+
 def insert_table_at_anchor(
     anchor: Paragraph,
     table_block: dict,
@@ -372,26 +395,69 @@ def insert_table_at_anchor(
     return trailing_para
 
 
-def insert_equation_placeholder_at_anchor(
+def insert_equation_at_anchor(
     anchor: Paragraph,
     equation_block: dict,
+    assets_doc_dir: Path,
     normal_style: str,
 ) -> Paragraph:
     """
-    Insert a visible placeholder for an equation block.
-
-    Step 3 behaviour:
-    - keep equation position in the document
-    - preserve equation numbering if available
+    Insert an equation as a borderless 2-column, 1-row table:
+    - left cell: equation image if available, otherwise placeholder text
+    - right cell: equation caption field / display number
     """
-    equation_no = (equation_block.get("equation_no") or "").strip()
+    image_rel_raw = equation_block.get("image")
+    image_rel = str(image_rel_raw).strip() if image_rel_raw else ""
 
-    placeholder = "[Equation"
-    if equation_no:
-        placeholder += f" {equation_no}"
-    placeholder += " omitted]"
+    equation_no_raw = equation_block.get("equation_no")
+    if equation_no_raw is None or equation_no_raw == "":
+        equation_display = ""
+    elif isinstance(equation_no_raw, int):
+        equation_display = f"{{EQ_CAP:{equation_block.get('object_id', 'unknown')}}}"
+    else:
+        equation_display = str(equation_no_raw).strip()
+        if equation_display.isdigit():
+            equation_display = f"{{EQ_CAP:{equation_block.get('object_id', 'unknown')}}}"
 
-    return insert_paragraph_after(anchor, text=placeholder, style_name=normal_style)
+    table = anchor._parent.add_table(rows=1, cols=2, width=Inches(6.5))
+    tbl_element = table._tbl
+    anchor._p.addnext(tbl_element)
+
+    remove_table_borders(table)
+
+    row = table.rows[0]
+    eq_cell = row.cells[0]
+    no_cell = row.cells[1]
+
+    eq_para = eq_cell.paragraphs[0]
+    no_para = no_cell.paragraphs[0]
+
+    try:
+        eq_para.style = normal_style
+        no_para.style = normal_style
+    except Exception:
+        pass
+
+    image_path = assets_doc_dir / image_rel if image_rel else None
+    if image_path and image_path.exists():
+        run = eq_para.add_run()
+        run.add_picture(str(image_path), width=Inches(1.0))
+    else:
+        eq_para.add_run("[Equation omitted]")
+
+    if equation_display:
+        no_para.add_run(equation_display)
+
+    trailing_p = OxmlElement("w:p")
+    tbl_element.addnext(trailing_p)
+    trailing_para = Paragraph(trailing_p, anchor._parent)
+
+    try:
+        trailing_para.style = normal_style
+    except Exception:
+        pass
+
+    return trailing_para
 
 
 # ---------------------------------------------------------------------------
@@ -413,7 +479,7 @@ def assemble_one_document(
     - insert real tables inline in normalized order
     - numbered tables get TAB_CAP fields
     - unnumbered table-like objects do not get TAB_CAP fields
-    - equations are inserted as visible numbered placeholders
+    - equations are inserted as borderless 2-column layout tables
     - do NOT insert figures yet
     - do NOT insert a local References subsection inside the chapter
     - append bibliography entries to the global REFERENCES chapter
@@ -444,7 +510,11 @@ def assemble_one_document(
     h2_style = find_first_existing_style(doc, ["H2", "Heading 2", "HEADING2"], fallback=h1_style)
     h3_style = find_first_existing_style(doc, ["H3", "Heading 3", "HEADING3"], fallback=h2_style)
     normal_style = find_first_existing_style(doc, ["Normal", "normal"])
-    table_style_name = find_first_existing_style(doc, ["Table Grid", "TableGrid", "Normal Table"], fallback="")
+    table_style_name = find_first_existing_style(
+        doc,
+        ["Table Grid", "TableGrid", "Normal Table"],
+        fallback="",
+    )
     if table_style_name == "":
         table_style_name = None
 
@@ -501,9 +571,10 @@ def assemble_one_document(
             continue
 
         if block_type == "equation":
-            anchor = insert_equation_placeholder_at_anchor(
+            anchor = insert_equation_at_anchor(
                 anchor=anchor,
                 equation_block=block,
+                assets_doc_dir=assets_doc_dir,
                 normal_style=normal_style,
             )
             continue

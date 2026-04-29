@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
+from PIL import Image, ImageDraw
 from docx import Document
 from docx.document import Document as _Document
 from docx.table import Table
@@ -306,6 +307,8 @@ def iter_block_items(parent: _Document):
 _REF_NUM_PATTERN = re.compile(r"\[(\d+)\]")
 _FIG_NUM_PATTERN = re.compile(r"\b(?:Figure|FIG\.?|Fig\.?)\s+(\d+)[.-](\d+)\b")
 _TAB_NUM_PATTERN = re.compile(r"\b(?:Table|TABLE)\s+(\d+)[.-](\d+)\b")
+_EQ_NUM_PATTERN_1 = re.compile(r"\bEq\.?\s*\((\d+)\)")
+_EQ_NUM_PATTERN_2 = re.compile(r"\bEquation\s*\((\d+)\)", re.IGNORECASE)
 
 
 def paragraph_text_with_markers(
@@ -314,13 +317,8 @@ def paragraph_text_with_markers(
     document_id: str,
 ) -> str:
     """
-    Convert obvious local reference, figure, and table mentions into internal
-    placeholders.
-
-    Rules:
-    - bibliography references stay as {REF:...}
-    - figure mentions in running text become {FIG_REF:...}
-    - table mentions in running text become {TAB_REF:...}
+    Convert obvious local reference, figure, table, and equation mentions into
+    internal placeholders.
     """
     def repl_ref(match: re.Match[str]) -> str:
         num = match.group(1)
@@ -338,9 +336,21 @@ def paragraph_text_with_markers(
         key = f"TAB_REF:{document_id}_{local_num:03d}"
         return "{" + key + "}"
 
+    def repl_eq_1(match: re.Match[str]) -> str:
+        local_num = int(match.group(1))
+        key = f"EQ_REF:{document_id}_{local_num:03d}"
+        return "{" + key + "}"
+
+    def repl_eq_2(match: re.Match[str]) -> str:
+        local_num = int(match.group(1))
+        key = f"EQ_REF:{document_id}_{local_num:03d}"
+        return "{" + key + "}"
+
     text = _REF_NUM_PATTERN.sub(repl_ref, text)
     text = _FIG_NUM_PATTERN.sub(repl_fig, text)
     text = _TAB_NUM_PATTERN.sub(repl_tab, text)
+    text = _EQ_NUM_PATTERN_1.sub(repl_eq_1, text)
+    text = _EQ_NUM_PATTERN_2.sub(repl_eq_2, text)
     return text
 
 
@@ -391,7 +401,7 @@ def extract_images_from_docx(
 
 
 # ---------------------------------------------------------------------------
-# Table extraction
+# Table / equation asset extraction
 # ---------------------------------------------------------------------------
 
 def extract_table_rows(table: Table) -> list[list[str]]:
@@ -443,6 +453,18 @@ def is_equation_number_text(text: str) -> bool:
     return bool(re.fullmatch(r"\([A-Za-z0-9.]+\)", s))
 
 
+def extract_equation_number_value(text: str) -> Optional[int]:
+    """
+    Extract numeric value from '(1)' style numbering.
+    Returns None for non-numeric labels like '(A.1)'.
+    """
+    s = " ".join(text.strip().split())
+    match = re.fullmatch(r"\((\d+)\)", s)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
 def table_nonempty_cells(rows: list[list[str]]) -> list[str]:
     """
     Flatten non-empty cell texts.
@@ -468,16 +490,40 @@ def looks_like_equation_layout_table(rows: list[list[str]]) -> bool:
     if not nonempty:
         return False
 
-    # Strong Chapter 3 case: only one visible non-empty cell and it is '(n)'.
     if len(nonempty) == 1 and is_equation_number_text(nonempty[0]):
         return True
 
-    # Slightly broader fallback for sparse equation layout tables.
     has_equation_number = any(is_equation_number_text(x) for x in nonempty)
     if has_equation_number and len(nonempty) <= 3:
         return True
 
     return False
+
+
+def write_equation_placeholder_png(
+    equations_dir: Path,
+    document_id: str,
+    equation_index: int,
+) -> dict:
+    """
+    Create a placeholder PNG asset for an equation.
+    """
+    ensure_dir(equations_dir)
+
+    image_name = f"{document_id}_eq_{equation_index:03d}.png"
+    out_path = equations_dir / image_name
+
+    width = 30
+    height = 10
+    image = Image.new("RGB", (width, height), "white")
+    draw = ImageDraw.Draw(image)
+    draw.text((width // 2, height // 2), "EQ", fill="black", anchor="mm")
+    image.save(out_path)
+
+    return {
+        "image": f"equations/{image_name}",
+        "file_name": image_name,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -595,10 +641,6 @@ def extract_table_number_from_caption(
 ) -> Optional[int]:
     """
     Return the local table number from a caption paragraph, if present.
-
-    Examples:
-      'Table 3-2: FPS design parameters' -> 2
-      '{TAB_REF:chapter03_002} FPS design parameters' -> 2
     """
     normalized = paragraph_text_with_markers(
         text=text,
@@ -625,28 +667,12 @@ def extract_blocks(
     doc: Document,
     info: SourceInfo,
     tables_dir: Path,
+    equations_dir: Path,
     image_records: list[dict],
     warnings: list[str],
 ) -> list[dict]:
     """
     Extract a conservative ordered block list from the document.
-
-    Current behaviour:
-    - preserve body order for paragraphs and tables
-    - paragraphs inside a References section are excluded from blocks and stored
-      only in the references list
-    - paragraphs immediately preceding a table that look like table captions are
-      consumed as caption metadata and are NOT emitted as normal paragraph blocks
-    - equation-layout Word tables are emitted as equation blocks, not tables
-    - raw table YAML is still preserved for equation-like objects
-    - tables are emitted where they appear in the document body
-    - figures are still appended later because image-position mapping is not yet
-      implemented
-
-    Important design rule:
-    - normalized YAML stores plain caption_text
-    - normalized YAML does NOT store TAB_CAP / FIG_CAP markers
-    - caption markers are rendered later by the assembler
     """
     blocks: list[dict] = []
     local_ref_map: dict[str, str] = {}
@@ -718,8 +744,6 @@ def extract_blocks(
                 document_id=info.document_id,
             )
 
-            # Caption immediately after a table: attach it to the last table block
-            # if that table still has no caption.
             if (
                 last_table_index_in_blocks is not None
                 and blocks[last_table_index_in_blocks].get("type") == "table"
@@ -746,8 +770,6 @@ def extract_blocks(
                     )
                 continue
 
-            # Caption immediately before a table: keep it pending and do not emit
-            # it as a normal paragraph block.
             if style_name.strip().lower() == "caption" and is_table_caption_text(normalized_text):
                 pending_table_caption_text = extract_caption_text_from_table_paragraph(
                     text=text,
@@ -793,19 +815,39 @@ def extract_blocks(
             if looks_like_equation_layout_table(rows):
                 equation_index += 1
 
-                equation_number = ""
+                equation_label = ""
+                equation_number_int: Optional[int] = None
                 for value in table_nonempty_cells(rows):
                     if is_equation_number_text(value):
-                        equation_number = value
+                        equation_label = value
+                        equation_number_int = extract_equation_number_value(value)
                         break
+
+                equation_asset = write_equation_placeholder_png(
+                    equations_dir=equations_dir,
+                    document_id=info.document_id,
+                    equation_index=equation_index,
+                )
+
+                if equation_number_int is not None:
+                    equation_object_id = f"{info.document_id}_{equation_number_int:03d}"
+                else:
+                    equation_object_id = f"{info.document_id}_eq_u{equation_index:03d}"
 
                 blocks.append(
                     {
                         "type": "equation",
-                        "object_id": f"{info.document_id}_eq_{equation_index:03d}",
-                        "equation_no": equation_number,
+                        "object_id": equation_object_id,
+                        "equation_no": equation_number_int,
+                        "equation_label": equation_label,
                         "source_table_file": table_meta["file"],
+                        "image": equation_asset["image"],
                     }
+                )
+
+                warnings.append(
+                    f"Equation object {equation_object_id} was detected from a DOCX layout table. "
+                    "A placeholder image was created because true formula rendering is not implemented."
                 )
 
                 pending_table_caption_text = ""
@@ -839,8 +881,6 @@ def extract_blocks(
                     f"Table object {object_id} extracted in body order but without automatic caption detection; caption must be reviewed manually."
                 )
 
-    # Keep figures as trailing blocks for now.
-    # We keep plain caption_text only; the assembler will later render FIG_CAP.
     for index, image_meta in enumerate(image_records, start=1):
         object_id = f"{info.document_id}_{index:03d}"
         blocks.append(
@@ -947,10 +987,12 @@ def normalize_one_docx(
     assets_dir = assets_root / output_subdir / info.document_id
     images_dir = assets_dir / "images"
     tables_dir = assets_dir / "tables"
+    equations_dir = assets_dir / "equations"
 
     ensure_dir(normalized_dir)
     ensure_dir(images_dir)
     ensure_dir(tables_dir)
+    ensure_dir(equations_dir)
 
     warnings: list[str] = []
     placeholder = is_placeholder_source(info, source_path)
@@ -970,6 +1012,7 @@ def normalize_one_docx(
         doc=doc,
         info=info,
         tables_dir=tables_dir,
+        equations_dir=equations_dir,
         image_records=image_records,
         warnings=warnings,
     )

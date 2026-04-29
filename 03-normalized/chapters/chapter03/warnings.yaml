@@ -1,4 +1,8 @@
 warnings:
+- Equation object chapter03_001 was detected from a DOCX layout table. A placeholder image was created
+  because true formula rendering is not implemented.
+- Equation object chapter03_002 was detected from a DOCX layout table. A placeholder image was created
+  because true formula rendering is not implemented.
 - Figure object chapter03_001 extracted without automatic position/caption detection; review manually.
 - Figure object chapter03_002 extracted without automatic position/caption detection; review manually.
 - Figure object chapter03_003 extracted without automatic position/caption detection; review manually.
