@@ -5,7 +5,7 @@ item_no: 3
 version: '01'
 title: Chapter 3
 status: present
-source_hash: 4504188454fa122c343a6d0ea6c2bbed4fda5b58ed9a7af633e6f5d201e8a4bf
+source_hash: f7dcff858ba67caa001f913f19d56092a848239029489fdf435112866fcd2c03
 blocks:
 - type: heading
   level: 1
@@ -304,7 +304,7 @@ blocks:
 - type: paragraph
   text: 'A systematic post-test analysis performed with RELAP5 {REF:chapter03_local_003} allowed an analytical
     expression for the powder thermal conductivity to be derived, which is strongly recommended for adoption
-    in the present benchmark:'
+    in the present benchmark, {EQ_REF:chapter03_002}:'
   style: Normal
 - type: equation
   object_id: chapter03_002
@@ -428,11 +428,11 @@ blocks:
   caption_text: ''
 - type: figure
   object_id: chapter03_005
-  image: images/chapter03_fig_005.emf
+  image: images/chapter03_fig_005.png
   caption_text: ''
 - type: figure
   object_id: chapter03_006
-  image: images/chapter03_fig_006.jpg
+  image: images/chapter03_fig_006.emf
   caption_text: ''
 - type: figure
   object_id: chapter03_007
@@ -448,31 +448,31 @@ blocks:
   caption_text: ''
 - type: figure
   object_id: chapter03_010
-  image: images/chapter03_fig_010.emf
+  image: images/chapter03_fig_010.jpg
   caption_text: ''
 - type: figure
   object_id: chapter03_011
-  image: images/chapter03_fig_011.png
+  image: images/chapter03_fig_011.emf
   caption_text: ''
 - type: figure
   object_id: chapter03_012
-  image: images/chapter03_fig_012.wmf
+  image: images/chapter03_fig_012.png
   caption_text: ''
 - type: figure
   object_id: chapter03_013
-  image: images/chapter03_fig_013.png
+  image: images/chapter03_fig_013.wmf
   caption_text: ''
 - type: figure
   object_id: chapter03_014
-  image: images/chapter03_fig_014.emf
+  image: images/chapter03_fig_014.png
   caption_text: ''
 - type: figure
   object_id: chapter03_015
-  image: images/chapter03_fig_015.png
+  image: images/chapter03_fig_015.emf
   caption_text: ''
 - type: figure
   object_id: chapter03_016
-  image: images/chapter03_fig_016.emf
+  image: images/chapter03_fig_016.png
   caption_text: ''
 - type: figure
   object_id: chapter03_017
@@ -480,7 +480,7 @@ blocks:
   caption_text: ''
 - type: figure
   object_id: chapter03_018
-  image: images/chapter03_fig_018.png
+  image: images/chapter03_fig_018.emf
   caption_text: ''
 references:
 - id: REF:chapter03_local_001
