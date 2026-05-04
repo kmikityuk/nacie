@@ -506,12 +506,19 @@ def write_equation_placeholder_png(
     equation_index: int,
 ) -> dict:
     """
-    Create a placeholder PNG asset for an equation.
+    Create a placeholder PNG asset for an equation, but do not overwrite
+    an existing manually prepared image.
     """
     ensure_dir(equations_dir)
 
     image_name = f"{document_id}_eq_{equation_index:03d}.png"
     out_path = equations_dir / image_name
+
+    if out_path.exists():
+        return {
+            "image": f"equations/{image_name}",
+            "file_name": image_name,
+        }
 
     width = 30
     height = 10
